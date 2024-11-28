@@ -20,6 +20,10 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install typos
 
+      - name: Verify typos installation
+        run: |
+          typos --help  # This will show the available commands
+
       - name: Get changed files
         id: changed-files
         run: |
@@ -79,10 +83,11 @@ jobs:
               # Read each typo and create a comment for it
               while IFS= read -r line; do
                 # Match the line that indicates an error and extract info
-                if [[ "$line" =~ error:\ `([^`]*)`\ should\ be\ `([^`]*)`\ ]]; then
+                if [[ "$line" =~ error:\ \`([^`]*)\`\ should\ be\ \`([^`]*)\` ]]; then
                   typo_word="${BASH_REMATCH[1]}"
                   correction="${BASH_REMATCH[2]}"
                   line_number=$(echo "$line" | grep -oP '\d+')
+
                   # Create a comment on the PR for each error found
                   comment_body="**Typo found**: \`$typo_word\` (line $line_number) should be \`$correction\`."
                   pr_number=${{ github.event.pull_request.number }}
