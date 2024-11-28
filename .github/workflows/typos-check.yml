@@ -86,19 +86,25 @@ jobs:
                   # Format the comment for each typo
                   comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
-                  # Escape special characters for JSON-like form submission
+                  # Ensure proper escaping of special characters for JSON-like submission
                   file_path_escaped=$(echo "$file_path" | jq -R .)
                   comment_escaped=$(echo "$comment" | jq -R .)
                   line_escaped=$(echo "$line" | jq -R .)
 
                   # Prepare the review comment using the `--form` type (multipart/form-data)
                   comment_body="```suggestion\n$line_escaped\n```"
+
+                  # Ensure that the JSON structure for comments is correctly formed
                   comments_array="[{
                     \"path\": $file_path_escaped,
                     \"position\": $line_number,
                     \"side\": \"RIGHT\",
                     \"body\": \"```suggestion\n$line_escaped\n```\"
                   }]"
+
+                  # Debug output to ensure the payload is correctly formatted
+                  echo "comment_body: $comment_body"
+                  echo "comments_array: $comments_array"
 
                   # Send the review comment using `--form`
                   curl -X POST \
