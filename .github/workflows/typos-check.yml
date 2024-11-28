@@ -92,14 +92,15 @@ jobs:
                   line_escaped=$(echo "$line" | jq -R .)
 
                   # Prepare the review comment using the `--form` type (multipart/form-data)
-                  comment_body="```suggestion\n$line_escaped\n```"
+                  echo "hihihihi"
+                  comment_body="\`\`\`suggestion\n$line_escaped\n\`\`\`"
 
                   # Ensure that the JSON structure for comments is correctly formed
                   comments_array="[{
                     \"path\": $file_path_escaped,
                     \"position\": $line_number,
                     \"side\": \"RIGHT\",
-                    \"body\": \"```suggestion\n$line_escaped\n```\"
+                    \"body\": \"\`\`\`suggestion\n$line_escaped\n\`\`\`"
                   }]"
 
                   # Debug output to ensure the payload is correctly formatted
