@@ -35,11 +35,14 @@ jobs:
           changed_files=$(git diff --name-only $base_commit $current_commit || true)
           echo "Changed files: $changed_files"
 
+          # If there are no changed files, set the environment variable to false
           if [ -z "$changed_files" ]; then
             echo "CHANGED_FILES=false" >> $GITHUB_ENV
           else
             echo "CHANGED_FILES=true" >> $GITHUB_ENV
-            echo "CHANGED_FILE_LIST=$changed_files" >> $GITHUB_ENV  # Save list of changed files
+            # Use newline-separated file list to avoid issues with special characters or spaces
+            echo "$changed_files" | tr ' ' '\n' > changed_files.txt
+            echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
           fi
 
       - name: Check if files have changed
@@ -59,12 +62,11 @@ jobs:
           set -e
           echo "Checking typos in changed files..."
 
-          # Iterate over each file in the CHANGED_FILE_LIST
-          IFS=' ' read -r -a files <<< "${{ env.CHANGED_FILE_LIST }}"
-          for file in "${files[@]}"; do
+          # Read the list of changed files from the text file
+          while IFS= read -r file; do
             echo "Checking typos in $file"
             typos check "$file"
-          done
+          done < ${{ env.CHANGED_FILE_LIST }}
 
       - name: Comment on PR if typos found
         if: ${{ failure() }}
