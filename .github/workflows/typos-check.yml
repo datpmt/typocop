@@ -87,19 +87,19 @@ jobs:
                   comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
                   # Post the review comment for each typo using the review_comment API
-                  spaces=$(printf '%*s' "$char_index" '')
-                  comment_body="```suggestion\n$spaces$line\n```"
+                  # spaces=$(printf '%*s' "$char_index" '')
+                  # comment_body="```suggestion\n$spaces$line\n```"
                   curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -d '{
                         "commit_id": "${{ github.sha }}",
-                        "body": "Please check typos!",
+                        "body": "'"$comment"'",
                         "event": "REQUEST_CHANGES",
                         "comments": [
                           {
                             "path": "'"$file_path"'",
                             "line": '"$line_number"',
                             "side": "RIGHT",
-                            "body": "'"$comment_body"'",
+                            "body": "```suggestion\n$line\n```",
                           }
                         ]
                       }' \
