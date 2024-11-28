@@ -93,7 +93,12 @@ jobs:
 
                   # Prepare the review comment using the `--form` type (multipart/form-data)
                   comment_body="```suggestion\n$line_escaped\n```"
-                  comments_array='[{"path": "'"$file_path_escaped"'", "position": '"$line_number"', "side": "RIGHT", "body": "'"$comment_body"'"}]'
+                  comments_array="[{
+                    \"path\": $file_path_escaped,
+                    \"position\": $line_number,
+                    \"side\": \"RIGHT\",
+                    \"body\": \"```suggestion\n$line_escaped\n```\"
+                  }]"
 
                   # Send the review comment using `--form`
                   curl -X POST \
