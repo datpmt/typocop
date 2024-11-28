@@ -65,7 +65,7 @@ jobs:
           # Read the list of changed files from the text file
           while IFS= read -r file; do
             echo "Checking typos in $file"
-            typos check "$file"
+            typos "$file"
           done < ${{ env.CHANGED_FILE_LIST }}
 
       - name: Comment on PR if typos found
