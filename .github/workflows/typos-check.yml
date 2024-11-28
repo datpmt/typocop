@@ -1,0 +1,52 @@
+name: Check Typos in Pull Request
+
+on: [pull_request]
+
+jobs:
+  check-typos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9.6'
+
+      - name: Install typos
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install typos
+
+      - name: Get changed files in PR
+        id: changed-files
+        run: |
+          changed_files=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+            | jq -r '.[].filename')
+
+          echo "changed_files=$changed_files" >> $GITHUB_ENV
+
+      - name: Check typos on changed files
+        run: |
+          for file in $changed_files; do
+            echo "Checking typos in $file"
+            typos check $file
+          done
+
+      - name: Comment on PR if typos found
+        if: ${{ failure() }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { context, github } = require('@actions/github');
+            const prNumber = context.payload.pull_request.number;
+            const commentBody = '### Typos found in your Pull Request. Please review the changes!';
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: prNumber,
+              body: commentBody,
+            });
