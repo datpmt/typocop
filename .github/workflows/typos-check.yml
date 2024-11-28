@@ -66,13 +66,10 @@ jobs:
             # Run typos checker and capture output, including errors
             typos "$file" --format brief > "$typos_output" || true
 
-            echo "typos output for $file:"
-            cat "$typos_output"
-
             # Check if typos output exists
             if [[ -n "$typos_output" ]]; then
               echo "Typos found in $file:"
-              echo "$typos_output"
+              cat "$typos_output"
 
               # Parse the typos output line by line
               while IFS= read -r line; do
