@@ -60,8 +60,6 @@ jobs:
           set -e
           echo "Checking typos in changed files..."
 
-          typos_output=$(mktemp)
-
           while IFS= read -r file; do
             echo "Checking typos in $file"
             typos_output=$(typos "$file" --format brief)
@@ -70,31 +68,33 @@ jobs:
               echo "Typos found in $file:"
               echo "$typos_output"
 
-              # Check if typos were found
-              if [[ $line =~ ^(.*):([0-9]+):([0-9]+):\ \`([^\`]+)\`\ \->\ \`([^\`]+)\`$ ]]; then
-                file_path="${BASH_REMATCH[1]}"
-                line_number="${BASH_REMATCH[2]}"
-                char_index="${BASH_REMATCH[3]}"
-                typo="${BASH_REMATCH[4]}"
-                suggestion="${BASH_REMATCH[5]}"
+              # Parse the typos output line by line
+              while IFS= read -r line; do
+                # Regex to match the typo output format
+                if [[ $line =~ ^(.*):([0-9]+):([0-9]+):\ \`([^\`]+)\`\ \->\ \`([^\`]+)\`$ ]]; then
+                  file_path="${BASH_REMATCH[1]}"
+                  line_number="${BASH_REMATCH[2]}"
+                  char_index="${BASH_REMATCH[3]}"
+                  typo="${BASH_REMATCH[4]}"
+                  suggestion="${BASH_REMATCH[5]}"
 
-                # Format the suggestion for the review comment
-                comment="**Typo**: \`$typo\` should be \`$suggestion\`."
+                  # Format the comment for the typo
+                  comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
-                # Post review comment using GitHub API
-                curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                  -d '{
-                      "body": "'"$comment"'",
-                      "commit_id": "${{ github.sha }}",
-                      "path": "'"$file_path"'",
-                      "position": '"$char_index"',
-                      "line": '"$line_number"',
-                      "side": "RIGHT"
-                    }' \
-                  "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews"
-              fi
+                  # Post the review comment using GitHub API
+                  curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -d '{
+                        "body": "'"$comment"'",
+                        "commit_id": "${{ github.sha }}",
+                        "path": "'"$file_path"'",
+                        "position": '"$char_index"',
+                        "line": '"$line_number"',
+                        "side": "RIGHT"
+                      }' \
+                    "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews"
+                fi
+              done <<< "$typos_output"
+            else
+              echo "No typos found in $file."
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
-
-          # Clean up temporary file
-          rm "$typos_output"
