@@ -20,19 +20,46 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install typos
 
-      - name: Get changed files in PR
+      - name: Get changed files
         id: changed-files
         run: |
-          changed_files=$(curl -s \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
-            | jq -r '.[] | .filename')
+          set -e
+          echo "Listing changed files..."
 
-          echo "changed_files=$changed_files" >> $GITHUB_ENV
+          git fetch --all
+          base_commit=$(git rev-parse origin/${{ github.base_ref }})
+          current_commit=$(git rev-parse HEAD)
+          echo "Base commit: $base_commit"
+          echo "Current commit: $current_commit"
+
+          changed_files=$(git diff --name-only $base_commit $current_commit || true)
+          echo "Changed files: $changed_files"
+
+          if [ -z "$changed_files" ]; then
+            echo "CHANGED_FILES=false" >> $GITHUB_ENV
+          else
+            echo "CHANGED_FILES=true" >> $GITHUB_ENV
+            echo "CHANGED_FILE_LIST=$changed_files" >> $GITHUB_ENV  # Save list of changed files
+          fi
+
+      - name: Check if files have changed
+        id: check-files
+        run: |
+          if [ "${{ env.CHANGED_FILES }}" == "true" ]; then
+            echo "Files have changed."
+            echo "RUN_SCRIPTS=true" >> $GITHUB_ENV
+          else
+            echo "No files changed."
+            echo "RUN_SCRIPTS=false" >> $GITHUB_ENV
+          fi
 
       - name: Check typos on changed files
+        if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
-          for file in $changed_files; do
+          set -e
+          echo "Checking typos in changed files..."
+
+          for file in ${{ env.CHANGED_FILE_LIST }}; do
             echo "Checking typos in $file"
             typos check $file
           done
