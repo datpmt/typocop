@@ -3,6 +3,7 @@ name: Check Typos in Pull Request
 on: [pull_request]
 
 jobs:
+  permissions: write-all
   check-typos:
     runs-on: ubuntu-latest
 
