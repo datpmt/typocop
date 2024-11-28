@@ -69,7 +69,7 @@ jobs:
             # Check if typos output exists
             if [[ -n "$typos_output" ]]; then
               echo "Typos found in $file:"
-              cat "$typos_output"
+              echo "$typos_output"
 
               # Parse the typos output line by line
               while IFS= read -r line; do
