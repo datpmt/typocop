@@ -56,28 +56,44 @@ jobs:
             echo "RUN_SCRIPTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Check typos in changed files
+      - name: Check typos in changed files and comment on PR
         if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
           set -e
           echo "Checking typos in changed files..."
 
+          typo_found=false
+
+          # Temporary file to store the typos output
+          typos_output=$(mktemp)
+
           # Read the list of changed files from the text file
           while IFS= read -r file; do
             echo "Checking typos in $file"
-            typos "$file"
+            # Capture typos output into a temp file
+            typos "$file" > "$typos_output" || true
+
+            # If typos were found, set flag and parse the output
+            if [ -s "$typos_output" ]; then
+              typo_found=true
+              # Read each typo and create a comment for it
+              while IFS= read -r line; do
+                # Match the line that indicates an error and extract info
+                if [[ "$line" =~ error:\ `([^`]*)`\ should\ be\ `([^`]*)`\ ]]; then
+                  typo_word="${BASH_REMATCH[1]}"
+                  correction="${BASH_REMATCH[2]}"
+                  line_number=$(echo "$line" | grep -oP '\d+')
+                  # Create a comment on the PR for each error found
+                  comment_body="**Typo found**: \`$typo_word\` (line $line_number) should be \`$correction\`."
+                  pr_number=${{ github.event.pull_request.number }}
+                  echo "Creating PR comment for typo: $typo_word"
+                  curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -X POST -d "{\"body\": \"$comment_body\"}" \
+                    "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/comments"
+                fi
+              done < "$typos_output"
+            fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
-      - name: Comment on PR if typos found
-        if: ${{ failure() }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { github } = require('@actions/github');
-            const prNumber = github.context.payload.pull_request.number;
-            const commentBody = '### Typos found in your Pull Request. Please review the changes!';
-            await github.rest.issues.createComment({
-              ...github.context.repo,
-              issue_number: prNumber,
-              body: commentBody,
-            });
+          # Clean up temporary file
+          rm "$typos_output"
