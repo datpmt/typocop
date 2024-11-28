@@ -86,20 +86,25 @@ jobs:
                   # Format the comment for each typo
                   comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
+                  # Escape any special characters for JSON
+                  file_path_escaped=$(echo "$file_path" | jq -R .)
+                  comment_escaped=$(echo "$comment" | jq -R .)
+                  line_escaped=$(echo "$line" | jq -R .)
+
                   # Post the review comment for each typo using the review_comment API
                   # spaces=$(printf '%*s' "$char_index" '')
                   # comment_body="```suggestion\n$spaces$line\n```"
                   curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -d '{
                         "commit_id": "${{ github.sha }}",
-                        "body": "'"$comment"'",
+                        "body": "'"$comment_escaped"'",
                         "event": "REQUEST_CHANGES",
                         "comments": [
                           {
-                            "path": "'"$file_path"'",
-                            "line": '"$line_number"',
+                            "path": "'"$file_path_escaped"'",
+                            "line": '"$line_escaped"',
                             "side": "RIGHT",
-                            "body": "```suggestion\n$line\n```",
+                            "body": "```suggestion\n'"$line_escaped"'\n```"
                           }
                         ]
                       }' \
