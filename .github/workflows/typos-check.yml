@@ -64,10 +64,10 @@ jobs:
             echo "Checking typos in $file"
 
             # Run typos checker and capture output, including errors
-            typos_output=$(typos "$file" --format brief 2>&1)
+            typos "$file" --format brief > "$typos_output" || true
 
             echo "typos output for $file:"
-            echo "$typos_output"
+            cat "$typos_output"
 
             # Check if typos output exists
             if [[ -n "$typos_output" ]]; then
