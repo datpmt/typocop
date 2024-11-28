@@ -86,28 +86,24 @@ jobs:
                   # Format the comment for each typo
                   comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
-                  # Escape any special characters for JSON
+                  # Escape special characters for JSON-like form submission
                   file_path_escaped=$(echo "$file_path" | jq -R .)
                   comment_escaped=$(echo "$comment" | jq -R .)
                   line_escaped=$(echo "$line" | jq -R .)
 
-                  # Post the review comment for each typo using the review_comment API
-                  # spaces=$(printf '%*s' "$char_index" '')
-                  # comment_body="```suggestion\n$spaces$line\n```"
-                  curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -d '{
-                        "commit_id": "${{ github.sha }}",
-                        "body": "'"$comment_escaped"'",
-                        "event": "REQUEST_CHANGES",
-                        "comments": [
-                          {
-                            "path": "'"$file_path_escaped"'",
-                            "line": '"$line_escaped"',
-                            "side": "RIGHT",
-                            "body": "```suggestion\n'"$line_escaped"'\n```"
-                          }
-                        ]
-                      }' \
+                  # Prepare the review comment using the `--form` type (multipart/form-data)
+                  comment_body="```suggestion\n$line_escaped\n```"
+                  comments_array='[{"path": "'"$file_path_escaped"'", "position": '"$line_number"', "side": "RIGHT", "body": "'"$comment_body"'"}]'
+
+                  # Send the review comment using `--form`
+                  curl -X POST \
+                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "X-GitHub-Api-Version: 2022-11-28" \
+                    --form "commit_id=${{ github.sha }}" \
+                    --form "body=${comment_escaped}" \
+                    --form "event=REQUEST_CHANGES" \
+                    --form "comments=${comments_array}" \
                     "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews"
                 fi
               done <<< "$typos_output"
