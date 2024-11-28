@@ -60,50 +60,40 @@ jobs:
           set -e
           echo "Checking typos in changed files..."
 
-          typo_found=false
           typos_output=$(mktemp)
 
           while IFS= read -r file; do
             echo "Checking typos in $file"
-            typos "$file" > "$typos_output" || true
+            typos "$file" --format brief > "$typos_output" || true
 
             # Log the typos output for debugging
             echo "Typos output for $file:"
             cat "$typos_output"
 
             # Check if typos were found
-            if [ -s "$typos_output" ]; then
-              typo_found=true
-              while IFS= read -r line; do
-                # Debug the line before matching
-                echo "Processing line: $line"
+            if [[ $line =~ ^(.*):([0-9]+):([0-9]+):\ \`([^\`]+)\`\ \->\ \`([^\`]+)\`$ ]]; then
+              file_path="${BASH_REMATCH[1]}"
+              line_number="${BASH_REMATCH[2]}"
+              char_index="${BASH_REMATCH[3]}"
+              typo="${BASH_REMATCH[4]}"
+              suggestion="${BASH_REMATCH[5]}"
 
-                # Correct way to use regular expressions in bash
-                if [[ "$line" =~ error:\ \`([^`]*)\`\ should\ be\ \`([^`]*)\` ]]; then
-                  typo_word="${BASH_REMATCH[1]}"
-                  correction="${BASH_REMATCH[2]}"
-                  line_number=$(echo "$line" | grep -oP '\d+')
+              # Format the suggestion for the review comment
+              comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
-                  # Debug the extracted information
-                  echo "Found typo: '$typo_word' should be '$correction' at line $line_number"
-
-                  # Comment on the PR for each error found
-                  comment_body="**Typo found**: \`$typo_word\` (line $line_number) should be \`$correction\`."
-                  pr_number=${{ github.event.pull_request.number }}
-                  echo "Creating PR comment for typo: $typo_word"
-                  curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -X POST \
-                    -d "{\"body\": \"$comment_body\"}" \
-                    "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/comments"
-                fi
-              done < "$typos_output"
+              # Post review comment using GitHub API
+              curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -d '{
+                    "body": "'"$comment"'",
+                    "commit_id": "${{ github.sha }}",
+                    "path": "'"$file_path"'",
+                    "position": '"$char_index"',
+                    "line": '"$line_number"',
+                    "side": "RIGHT"
+                  }' \
+                "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews"
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
           # Clean up temporary file
           rm "$typos_output"
-
-      - name: Comment if no typos found
-        if: ${{ env.TYPO_FOUND == 'false' }}
-        run: |
-          echo "No typos found, skipping PR comment."
