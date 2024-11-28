@@ -53,15 +53,17 @@ jobs:
             echo "RUN_SCRIPTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Check typos on changed files
+      - name: Check typos in changed files
         if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
           set -e
           echo "Checking typos in changed files..."
 
-          for file in ${{ env.CHANGED_FILE_LIST }}; do
+          # Iterate over each file in the CHANGED_FILE_LIST
+          IFS=' ' read -r -a files <<< "${{ env.CHANGED_FILE_LIST }}"
+          for file in "${files[@]}"; do
             echo "Checking typos in $file"
-            typos check $file
+            typos check "$file"
           done
 
       - name: Comment on PR if typos found
@@ -69,11 +71,11 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { context, github } = require('@actions/github');
-            const prNumber = context.payload.pull_request.number;
+            const { github } = require('@actions/github');
+            const prNumber = github.context.payload.pull_request.number;
             const commentBody = '### Typos found in your Pull Request. Please review the changes!';
             await github.rest.issues.createComment({
-              ...context.repo,
+              ...github.context.repo,
               issue_number: prNumber,
               body: commentBody,
             });
