@@ -83,47 +83,34 @@ jobs:
                   typo="${BASH_REMATCH[4]}"
                   suggestion="${BASH_REMATCH[5]}"
 
-                  echo "file_path: $file_path"
-                  echo "line_number: $line_number"
-                  echo "char_index: $char_index"
-                  echo "typo: $typo"
-                  echo "suggestion: $suggestion"
-
                   # Format the comment for each typo
                   comment="**Typo**: \`$typo\` should be \`$suggestion\`."
 
-                  # Ensure proper escaping of special characters for JSON-like submission
-                  file_path_escaped=$(echo "$file_path" | jq -R .)
-                  comment_escaped=$(echo "$comment" | jq -R .)
-                  line_escaped=$(echo "$line" | jq -R .)
+                  # Prepare the comment data to send to GitHub API
+                  comment_body="**Typo**: \`$typo\` should be \`$suggestion\`."
 
-                  # Prepare the review comment using the `--form` type (multipart/form-data)
-                  echo "hihihihi"
-                  # comment_body="\`\`\`suggestion\n$line_escaped\n\`\`\`"
+                  # Using GitHub Script action to post comments
+                  echo "Posting typo comment for $file_path at line $line_number"
+                  echo "$comment_body"
 
-                  # # Ensure that the JSON structure for comments is correctly formed
-                  # comments_array="[{
-                  #   \"path\": $file_path_escaped,
-                  #   \"position\": $line_number,
-                  #   \"side\": \"RIGHT\",
-                  #   \"body\": \"\`\`\`suggestion\n$line_escaped\n\`\`\`"
-                  # }]"
+                  # Use actions/github-script to post the comment
+                  uses: actions/github-script@v6
+                  with:
+                    script: |
+                      const commentBody = `**Typo**: \`${typo}\` should be \`${suggestion}\``;
+                      const filePath = '${file_path}';
+                      const lineNumber = ${line_number};
+                      const prNumber = ${{ github.event.pull_request.number }};
 
-                  # # Debug output to ensure the payload is correctly formatted
-                  # echo "comment_body: $comment_body"
-                  # echo "comments_array: $comments_array"
-
-                  # # Send the review comment using `--form`
-                  # curl -X POST \
-                  #   -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                  #   -H "Accept: application/vnd.github+json" \
-                  #   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  #   --form "commit_id=${{ github.sha }}" \
-                  #   --form "body=${comment_escaped}" \
-                  #   --form "event=REQUEST_CHANGES" \
-                  #   --form "comments=${comments_array}" \
-                  #   "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews"
-                fi
+                      // Create the review comment
+                      await github.rest.pulls.createReviewComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: prNumber,
+                        body: commentBody,
+                        path: filePath,
+                        position: lineNumber,
+                      });
               done <<< "$typos_output"
             else
               echo "No typos found in $file."
