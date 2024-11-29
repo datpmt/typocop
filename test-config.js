@@ -15,7 +15,7 @@ console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
 async function sendPostRequest({githubToken, owner, repo, pullNumber, commitId, body, path, comment, position }) {
-  const url = `/repos/${owner}/${repo}/pulls/${pullNumber}/reviews`;
+  const url = `/repos/${repo}/pulls/${pullNumber}/reviews`;
 
   const data = {
     commit_id: commitId,
@@ -35,7 +35,7 @@ async function sendPostRequest({githubToken, owner, repo, pullNumber, commitId, 
 
   const axiosInstance = axios.create({
     baseURL: 'https://api.github.com',
-    headers: { Authorization: `token ${githubToken}` },
+    headers: { Authorization: `Bearer ${githubToken}` },
   });
 
   try {
