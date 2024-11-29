@@ -60,52 +60,56 @@ function handleError(error) {
   }
 }
 
-if (typoOutput) {
-  const typoArray = typoOutput.split('\n').map(line => line.trim()).filter(line => line);
+async function processTypos() {
+  if (typoOutput) {
+    const typoArray = typoOutput.split('\n').map(line => line.trim()).filter(line => line);
 
-  console.log('typoArray', typoArray);
+    console.log('typoArray', typoArray);
 
-  // Optionally, you could parse these lines into more structured objects
-  const parsedTypos = typoArray.map(typo => {
-    // Example of parsing each typo into a structured object
-    const [file, line, column, typoDetail] = typo.split(':');
-    const typoMatch = typoDetail.match(/`(.*?)` -> `(.*?)`/);
-    const [incorrectWord, correctWord] = typoMatch ? typoMatch.slice(1) : [];
+    // Optionally, you could parse these lines into more structured objects
+    const parsedTypos = typoArray.map(typo => {
+      // Example of parsing each typo into a structured object
+      const [file, line, column, typoDetail] = typo.split(':');
+      const typoMatch = typoDetail.match(/`(.*?)` -> `(.*?)`/);
+      const [incorrectWord, correctWord] = typoMatch ? typoMatch.slice(1) : [];
 
-    return {
-      file: file.trim(),
-      line: parseInt(line.trim(), 10),
-      column: parseInt(column.trim(), 10),
-      incorrectWord: incorrectWord.trim(),
-      correctWord: correctWord.trim(),
-    };
-  });
+      return {
+        file: file.trim(),
+        line: parseInt(line.trim(), 10),
+        column: parseInt(column.trim(), 10),
+        incorrectWord: incorrectWord.trim(),
+        correctWord: correctWord.trim(),
+      };
+    });
 
-  console.log('parsedTypos', parsedTypos);
+    console.log('parsedTypos', parsedTypos);
 
-  if (parsedTypos) {
-    for (const typo of parsedTypos) {
-      console.log(`File: ${typo.file}`);
-      console.log(`Line: ${typo.line}`);
-      console.log(`Column: ${typo.column}`);
-      console.log(`Incorrect Word: ${typo.incorrectWord}`);
-      console.log(`Correct Word: ${typo.correctWord}`);
-      console.log('------------------------');
+    if (parsedTypos) {
+      for (const typo of parsedTypos) {
+        console.log(`File: ${typo.file}`);
+        console.log(`Line: ${typo.line}`);
+        console.log(`Column: ${typo.column}`);
+        console.log(`Incorrect Word: ${typo.incorrectWord}`);
+        console.log(`Correct Word: ${typo.correctWord}`);
+        console.log('------------------------');
 
-      const response = await sendPostRequest({
-        owner,
-        repo,
-        pullNumber,
-        commitId,
-        body: 'This is a review comment.',
-        path: typo.file,
-        comment: 'Please check this code.',
-        position: typo.line
-      });
+        const response = await sendPostRequest({
+          owner,
+          repo,
+          pullNumber,
+          commitId,
+          body: 'This is a review comment.',
+          path: typo.file,
+          comment: 'Please check this code.',
+          position: typo.line
+        });
 
-      console.log('response', response);
+        console.log('response', response);
+      }
     }
+  } else {
+    console.log('No typos found.');
   }
-} else {
-  console.log('No typos found.');
 }
+
+processTypos();
