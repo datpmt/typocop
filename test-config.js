@@ -15,7 +15,7 @@ console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
 async function sendPostRequest({ githubToken, owner, repo, pullNumber, commitId, body, path, comment, position }) {
-  const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/reviews`;
+  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/reviews`;
 
   const data = {
     commit_id: commitId,
