@@ -108,7 +108,10 @@ jobs:
                   POSITION="$line_number"
                   COMMENT="$suggestion"
 
-                  node request-review.js GITHUB_TOKEN OWNER REPO PULL_NUMBER COMMIT_ID BODY PATH POSITION COMMENT
+                  NODE_PATH=$(which node)
+                  echo "Node path: $NODE_PATH"
+
+                  NODE_PATH request-review.js GITHUB_TOKEN OWNER REPO PULL_NUMBER COMMIT_ID BODY PATH POSITION COMMENT
                 fi
               done <<< "$typos_output"
             else
