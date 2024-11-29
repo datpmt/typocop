@@ -65,6 +65,11 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Check Node.js version
+        run: |
+          node --version
+          npm --version
+
       - name: Check typos in changed files and comment on PR
         if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
