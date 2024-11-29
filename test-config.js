@@ -1,3 +1,4 @@
+const typos = process.env.TYPE_OUTPUT;
 const githubToken = process.env.GITHUB_TOKEN;
 const owner = process.env.OWNER;
 const repo = process.env.REPO;
@@ -8,6 +9,7 @@ const filePath = process.env.PATH;
 const position = process.env.POSITION;
 const comment = process.env.COMMENT;
 
+console.log(`typos: ${typos}`);
 console.log(`GITHUB_TOKEN: ${githubToken}`);
 console.log(`OWNER: ${owner}`);
 console.log(`REPO: ${repo}`);

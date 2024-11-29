@@ -83,10 +83,8 @@ jobs:
               echo "Typos found in $file:"
               echo "$typos_output"
 
-              # Check if node is available
-              echo "Checking Node.js version..."
-              which node || { echo "Node.js is not available"; exit 1; }
-              node --version
+              TYPE_OUTPUT="$typos_output" \
+              node test-config.js
 
               # Parse the typos output line by line
               # while IFS= read -r line; do
