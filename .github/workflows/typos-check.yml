@@ -91,31 +91,8 @@ jobs:
               REPO=${{ github.repository }} \
               PULL_NUMBER=${{ github.event.pull_request.number }} \
               COMMIT_ID=$(git rev-parse HEAD) \
+              BASE_COMMIT_ID=$(git rev-parse origin/${{ github.base_ref }}) \
               node test-config.js
-
-              # Parse the typos output line by line
-              # while IFS= read -r line; do
-              #   echo "line: $line"
-              #   if [[ $line =~ ^(.*):([0-9]+):([0-9]+):\ \`([^\`]+)\`\ \-\>\ \`([^\`]+)\`$ ]]; then
-              #     file_path="${BASH_REMATCH[1]}"
-              #     line_number="${BASH_REMATCH[2]}"
-              #     char_index="${BASH_REMATCH[3]}"
-              #     typo="${BASH_REMATCH[4]}"
-              #     suggestion="${BASH_REMATCH[5]}"
-
-              #     # Pass environment variables to Node.js script
-              #     echo "Commenting on PR for typo in file $file_path, line $line_number"
-              #     echo "Typo: $typo, Suggestion: $suggestion"
-
-              #     # Run the Node.js script with the environment variables
-              #     BODY="hihi" \
-              #     PATH="$file_path" \
-              #     POSITION="$line_number" \
-              #     COMMENT="$suggestion" \
-
-              #     node test-config.js
-              #   fi
-              # done <<< "$typos_output"
             else
               echo "No typos found in $file."
             fi
