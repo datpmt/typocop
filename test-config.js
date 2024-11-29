@@ -9,7 +9,7 @@ const filePath = process.env.PATH;
 const position = process.env.POSITION;
 const comment = process.env.COMMENT;
 
-console.log(`typos: ${typos}`);
+console.log('typoOutput', typoOutput);
 console.log(`GITHUB_TOKEN: ${githubToken}`);
 console.log(`OWNER: ${owner}`);
 console.log(`REPO: ${repo}`);
@@ -22,7 +22,6 @@ console.log(`COMMENT: ${comment}`);
 
 
 if (typoOutput) {
-  console.log('typoOutput', typoOutput);
   const typoArray = typoOutput.split('\n').map(line => line.trim()).filter(line => line);
 
   console.log('typoArray', typoArray);
