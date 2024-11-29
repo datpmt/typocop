@@ -60,6 +60,11 @@ jobs:
             echo "RUN_SCRIPTS=false" >> $GITHUB_ENV
           fi
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18
+
       - name: Check typos in changed files and comment on PR
         if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
