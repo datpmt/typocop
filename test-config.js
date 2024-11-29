@@ -18,7 +18,7 @@ async function sendPostRequest({ githubToken, repo, pullNumber, commitId, commen
   const data = {
     commit_id: commitId,
     body: "This is close to perfect! Please address the suggested inline change.",
-    event: 'REQUEST_CHANGES',
+    event: 'COMMENT',
     comments
   };
 
