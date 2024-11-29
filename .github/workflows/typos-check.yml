@@ -93,17 +93,17 @@ jobs:
                   echo "Typo: $typo, Suggestion: $suggestion"
 
                   # Run the Node.js script with the environment variables
-                  env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                    OWNER: ${{ github.repository_owner }}
-                    REPO: ${{ github.repository }}
-                    PULL_NUMBER: ${{ github.event.pull_request.number }}
-                    COMMIT_ID: ${{ github.sha }}
-                    BODY: "$suggestion"
-                    PATH: "$file_path"
-                    POSITION: "$line_number"
-                    COMMENT: 'This is a review comment.'  # Custom comment message
-                  run: node request-review.js
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  OWNER: ${{ github.repository_owner }}
+                  REPO: ${{ github.repository }}
+                  PULL_NUMBER: ${{ github.event.pull_request.number }}
+                  COMMIT_ID: ${{ github.sha }}
+                  BODY: "hihi"
+                  PATH: "$file_path"
+                  POSITION: "$line_number"
+                  COMMENT: "$suggestion"
+
+                  node request-review.js GITHUB_TOKEN OWNER REPO PULL_NUMBER COMMIT_ID BODY PATH POSITION COMMENT
                 fi
               done <<< "$typos_output"
             else
