@@ -76,6 +76,11 @@ jobs:
           set -e
           echo "Checking typos in changed files..."
 
+          # Check if node is available
+          echo "Checking Node.js version..."
+          which node || { echo "Node.js is not available"; exit 1; }
+          node --version
+
           # Loop through each changed file
           while IFS= read -r file; do
             echo "Checking typos in $file"
