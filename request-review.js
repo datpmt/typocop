@@ -1,86 +1,47 @@
 const axios = require('axios');
 
-// Validate environment variables
-const githubToken = process.env.GITHUB_TOKEN;
-if (!githubToken) {
-  throw new Error('GitHub token is required');
-}
-
-const owner = process.env.OWNER;
-if (!owner) {
-  throw new Error('GitHub owner is required');
-}
-
-const repo = process.env.REPO;
-if (!repo) {
-  throw new Error('GitHub repository name is required');
-}
-
-const pullNumber = process.env.PULL_NUMBER;
-if (!pullNumber) {
-  throw new Error('GitHub pull request number is required');
-}
-
-const commitId = process.env.COMMIT_ID;
-if (!commitId) {
-  throw new Error('Commit ID is required');
-}
-
-const body = process.env.BODY;
-if (!body) {
-  throw new Error('Body is required');
-}
-
-const path = process.env.PATH;
-if (!path) {
-  throw new Error('Path is required');
-}
-
-const position = process.env.POSITION;
-if (!position) {
-  throw new Error('Position is required');
-}
-
-
-const comment = process.env.COMMENT;
-if (!comment) {
-  throw new Error('Comment is required');
-}
-
-async function sendPostRequest() {
-  const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/reviews`;
-  const headers = {
-    Authorization: `token ${githubToken}`,
-  };
+export async function sendPostRequest({githubToken, owner, repo, pullNumber, commitId, body, path, comment, position }) {
+  const url = `/repos/${owner}/${repo}/pulls/${pullNumber}/reviews`;
 
   const data = {
     commit_id: commitId,
-    body: body,
+    body,
     event: 'REQUEST_CHANGES',
     comments: [
       {
-        path: path,
+        path,
         body: comment,
         side: 'RIGHT',
-        position: position,
-      }
-    ]
+        position,
+      },
+    ],
   };
 
   console.log('Sending request with data:', data);
 
+  const axiosInstance = axios.create({
+    baseURL: 'https://api.github.com',
+    headers: { Authorization: `token ${githubToken}` },
+  });
+
   try {
-    const response = await axios.post(url, data, { headers });
+    const response = await axiosInstance.post(url, data);
     console.log('Response:', response.data);
+    return response.data;  // Return response for further processing if needed
   } catch (error) {
-    if (error.response) {
-      console.error('GitHub API Error:', error.response.status, error.response.data);
-    } else if (error.request) {
-      console.error('No response received:', error.request);
-    } else {
-      console.error('Error during POST request:', error.message);
-    }
+    handleError(error);
   }
 }
 
-sendPostRequest();
+function handleError(error) {
+  if (error.response) {
+    // HTTP response error (e.g., 404, 500)
+    console.error(`GitHub API Error: ${error.response.status}`, error.response.data);
+  } else if (error.request) {
+    // No response received
+    console.error('No response received:', error.request);
+  } else {
+    // Other errors (e.g., setup issues)
+    console.error('Error during POST request:', error.message);
+  }
+}
