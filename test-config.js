@@ -11,18 +11,15 @@ console.log(`GITHUB_TOKEN: ${githubToken}`);
 console.log(`REPO: ${repo}`);
 console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
-console.log(`BASE_COMMIT_ID`, process.env.BASE_COMMIT_ID);
-console.log(`GITHUB_SHA`, process.env.GITHUB_SHA);
 
-async function sendPostRequest({ githubToken, repo, pullNumber, commitId, body, path, comment, line }) {
-  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
+async function sendPostRequest({ githubToken, repo, pullNumber, commitId, comments }) {
+  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/reviews`;
 
   const data = {
     commit_id: commitId,
     body,
-    path,
-    side: 'RIGHT',
-    line
+    event: 'REQUEST_CHANGES',
+    comments
   };
 
   console.log('Sending request with data:', data);
@@ -82,6 +79,17 @@ async function processTypos() {
     console.log('parsedTypos', parsedTypos);
 
     if (parsedTypos) {
+      const comments = parsedTypos.map(typo => {
+        return {
+          path: typo.file,
+          body: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
+          side: 'RIGHT',
+          line: typo.line,
+        }
+      });
+
+      console.log('comments', comments);
+
       for (const typo of parsedTypos) {
         console.log(`File: ${typo.file}`);
         console.log(`Line: ${typo.line}`);
@@ -96,9 +104,7 @@ async function processTypos() {
           pullNumber,
           commitId,
           body: 'This is a review comment.',
-          path: typo.file,
-          comment: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
-          line: typo.line
+          comments
         });
 
         console.log('response', response);
