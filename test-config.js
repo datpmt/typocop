@@ -90,25 +90,16 @@ async function processTypos() {
 
       console.log('comments', comments);
 
-      for (const typo of parsedTypos) {
-        console.log(`File: ${typo.file}`);
-        console.log(`Line: ${typo.line}`);
-        console.log(`Column: ${typo.column}`);
-        console.log(`Incorrect Word: ${typo.incorrectWord}`);
-        console.log(`Correct Word: ${typo.correctWord}`);
-        console.log('------------------------');
+      const response = await sendPostRequest({
+        githubToken,
+        repo,
+        pullNumber,
+        commitId,
+        body: 'This is a review comment.',
+        comments
+      });
 
-        const response = await sendPostRequest({
-          githubToken,
-          repo,
-          pullNumber,
-          commitId,
-          body: 'This is a review comment.',
-          comments
-        });
-
-        console.log('response', response);
-      }
+      console.log('response', response);
     }
   } else {
     console.log('No typos found.');
