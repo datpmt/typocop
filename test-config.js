@@ -21,7 +21,7 @@ async function sendPostRequest({ githubToken, owner, repo, pullNumber, commitId,
     commit_id: commitId,
     body,
     event: 'REQUEST_CHANGES',
-    comments: [
+    threads: [
       {
         path,
         body: comment,
