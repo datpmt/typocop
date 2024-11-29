@@ -90,7 +90,7 @@ jobs:
               GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
               REPO=${{ github.repository }} \
               PULL_NUMBER=${{ github.event.pull_request.number }} \
-              COMMIT_ID=$(git rev-parse HEAD) \
+              COMMIT_ID=${{ github.event.pull_request.head.sha }} \
               BASE_COMMIT_ID=$(git rev-parse origin/${{ github.base_ref }}) \
               GITHUB_SHA=${{ github.sha }} \
               node test-config.js
