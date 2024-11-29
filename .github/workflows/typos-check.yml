@@ -78,7 +78,7 @@ jobs:
             # Run typos checker and capture output, including errors
             typos_output=$(typos "$file" --format brief 2>&1) || true
 
-            Check if typos output exists
+            # Check if typos output exists
             if [[ -n "$typos_output" ]]; then
               echo "Typos found in $file:"
               echo "$typos_output"
