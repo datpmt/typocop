@@ -26,7 +26,7 @@ async function sendPostRequest({ githubToken, owner, repo, pullNumber, commitId,
         path,
         body: comment,
         side: 'RIGHT',
-        position,
+        line,
       },
     ],
   };
@@ -105,7 +105,7 @@ async function processTypos() {
           body: 'This is a review comment.',
           path: typo.file,
           comment: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
-          position: typo.line
+          line: typo.line
         });
 
         console.log('response', response);
