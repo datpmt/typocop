@@ -13,20 +13,14 @@ console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
 async function sendPostRequest({ githubToken, repo, pullNumber, commitId, body, path, comment, line }) {
-  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/reviews`;
+  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
 
   const data = {
     commit_id: commitId,
     body,
-    event: 'REQUEST_CHANGES',
-    threads: [
-      {
-        path,
-        body: comment,
-        side: 'RIGHT',
-        line,
-      },
-    ],
+    path,
+    side: 'RIGHT',
+    line
   };
 
   console.log('Sending request with data:', data);
