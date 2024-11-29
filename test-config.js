@@ -2,19 +2,17 @@ const axios = require('axios');
 
 const typoOutput = process.env.TYPO_OUTPUT;
 const githubToken = process.env.GITHUB_TOKEN;
-const owner = process.env.OWNER;
 const repo = process.env.REPO;
 const pullNumber = process.env.PULL_NUMBER;
 const commitId = process.env.COMMIT_ID;
 
 console.log('typoOutput', typoOutput);
 console.log(`GITHUB_TOKEN: ${githubToken}`);
-console.log(`OWNER: ${owner}`);
 console.log(`REPO: ${repo}`);
 console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
-async function sendPostRequest({ githubToken, owner, repo, pullNumber, commitId, body, path, comment, position }) {
+async function sendPostRequest({ githubToken, repo, pullNumber, commitId, body, path, comment, line }) {
   const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/reviews`;
 
   const data = {
@@ -98,7 +96,6 @@ async function processTypos() {
 
         const response = await sendPostRequest({
           githubToken,
-          owner,
           repo,
           pullNumber,
           commitId,

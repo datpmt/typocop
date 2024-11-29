@@ -88,7 +88,6 @@ jobs:
 
               TYPO_OUTPUT="$typos_output" \
               GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-              OWNER=${{ github.repository_owner }} \
               REPO=${{ github.repository }} \
               PULL_NUMBER=${{ github.event.pull_request.number }} \
               COMMIT_ID=${{ github.sha }} \
