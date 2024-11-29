@@ -63,7 +63,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '16'
 
       - name: Check typos in changed files and comment on PR
         if: ${{ env.RUN_SCRIPTS == 'true' }}
@@ -98,20 +98,17 @@ jobs:
                   echo "Typo: $typo, Suggestion: $suggestion"
 
                   # Run the Node.js script with the environment variables
-                  GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-                  OWNER=${{ github.repository_owner }}
-                  REPO=${{ github.repository }}
-                  PULL_NUMBER=${{ github.event.pull_request.number }}
-                  COMMIT_ID=${{ github.sha }}
-                  BODY="hihi"
-                  PATH="$file_path"
-                  POSITION="$line_number"
-                  COMMENT="$suggestion"
+                  GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+                  OWNER=${{ github.repository_owner }} \
+                  REPO=${{ github.repository }} \
+                  PULL_NUMBER=${{ github.event.pull_request.number }} \
+                  COMMIT_ID=${{ github.sha }} \
+                  BODY="hihi" \
+                  PATH="$file_path" \
+                  POSITION="$line_number" \
+                  COMMENT="$suggestion" \
 
-                  NODE_PATH=$(command -v node)
-                  echo "Node path: $NODE_PATH"
-
-                  NODE_PATH request-review.js GITHUB_TOKEN OWNER REPO PULL_NUMBER COMMIT_ID BODY PATH POSITION COMMENT
+                  node test-config.js
                 fi
               done <<< "$typos_output"
             else
