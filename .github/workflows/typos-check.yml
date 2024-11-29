@@ -8,19 +8,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.14.0-alpha.1'
 
+      # Step 3: Install the typos checker
       - name: Install typos
         run: |
           python3 -m pip install --upgrade pip
           pip install typos
 
+      # Step 4: Get the list of changed files
       - name: Get changed files
         id: changed-files
         run: |
@@ -44,6 +48,7 @@ jobs:
             echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
           fi
 
+      # Step 5: Check if files have changed
       - name: Check if files have changed
         id: check-files
         run: |
@@ -83,34 +88,23 @@ jobs:
                   typo="${BASH_REMATCH[4]}"
                   suggestion="${BASH_REMATCH[5]}"
 
-                  # Format the comment for each typo
-                  comment="**Typo**: \`$typo\` should be \`$suggestion\`."
+                  # Pass environment variables to Node.js script
+                  echo "Commenting on PR for typo in file $file_path, line $line_number"
+                  echo "Typo: $typo, Suggestion: $suggestion"
 
-                  # Prepare the comment data to send to GitHub API
-                  comment_body="**Typo**: \`$typo\` should be \`$suggestion\`."
-
-                  # Using GitHub Script action to post comments
-                  echo "Posting typo comment for $file_path at line $line_number"
-                  echo "$comment_body"
-
-                  # Use actions/github-script to post the comment
-                  uses: actions/github-script@v6
-                  with:
-                    script: |
-                      const commentBody = `**Typo**: \`${typo}\` should be \`${suggestion}\``;
-                      const filePath = '${file_path}';
-                      const lineNumber = ${line_number};
-                      const prNumber = ${{ github.event.pull_request.number }};
-
-                      // Create the review comment
-                      await github.rest.pulls.createReviewComment({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        pull_number: prNumber,
-                        body: commentBody,
-                        path: filePath,
-                        position: lineNumber,
-                      });
+                  # Run the Node.js script with the environment variables
+                  env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    OWNER: ${{ github.repository_owner }}
+                    REPO: ${{ github.repository }}
+                    PULL_NUMBER: ${{ github.event.pull_request.number }}
+                    COMMIT_ID: ${{ github.sha }}
+                    BODY: "$suggestion"
+                    PATH: "$file_path"
+                    POSITION: "$line_number"
+                    COMMENT: 'This is a review comment.'  # Custom comment message
+                  run: node request-review.js
+                fi
               done <<< "$typos_output"
             else
               echo "No typos found in $file."
