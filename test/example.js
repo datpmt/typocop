@@ -1,2 +1,2 @@
-var languege = 'en'
-console.log(languege)
+var langueges = 'en'
+console.log(langueges)
