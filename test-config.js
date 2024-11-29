@@ -12,6 +12,7 @@ console.log(`REPO: ${repo}`);
 console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 console.log(`BASE_COMMIT_ID`, process.env.BASE_COMMIT_ID);
+console.log(`GITHUB_SHA`, process.env.GITHUB_SHA);
 
 async function sendPostRequest({ githubToken, repo, pullNumber, commitId, body, path, comment, line }) {
   const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
