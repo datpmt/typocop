@@ -83,7 +83,12 @@ jobs:
               echo "Typos found in $file:"
               echo "$typos_output"
 
-              TYPE_OUTPUT="$typos_output" \
+              TYPO_OUTPUT="$typos_output" \
+              GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+              OWNER=${{ github.repository_owner }} \
+              REPO=${{ github.repository }} \
+              PULL_NUMBER=${{ github.event.pull_request.number }} \
+              COMMIT_ID=${{ github.sha }} \
               node test-config.js
 
               # Parse the typos output line by line
@@ -101,11 +106,6 @@ jobs:
               #     echo "Typo: $typo, Suggestion: $suggestion"
 
               #     # Run the Node.js script with the environment variables
-              #     GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
-              #     OWNER=${{ github.repository_owner }} \
-              #     REPO=${{ github.repository }} \
-              #     PULL_NUMBER=${{ github.event.pull_request.number }} \
-              #     COMMIT_ID=${{ github.sha }} \
               #     BODY="hihi" \
               #     PATH="$file_path" \
               #     POSITION="$line_number" \
