@@ -14,8 +14,8 @@ console.log(`REPO: ${repo}`);
 console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
-async function sendPostRequest({githubToken, owner, repo, pullNumber, commitId, body, path, comment, position }) {
-  const url = `/repos/${repo}/pulls/${pullNumber}/reviews`;
+async function sendPostRequest({ githubToken, owner, repo, pullNumber, commitId, body, path, comment, position }) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/reviews`;
 
   const data = {
     commit_id: commitId,
@@ -35,7 +35,11 @@ async function sendPostRequest({githubToken, owner, repo, pullNumber, commitId, 
 
   const axiosInstance = axios.create({
     baseURL: 'https://api.github.com',
-    headers: { Authorization: `Bearer ${githubToken}` },
+    headers: {
+      Authorization: `Bearer ${githubToken}`, // Use 'Bearer' instead of 'token'
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',  // Include the required API version header
+    },
   });
 
   try {
@@ -68,7 +72,6 @@ async function processTypos() {
 
     // Optionally, you could parse these lines into more structured objects
     const parsedTypos = typoArray.map(typo => {
-      // Example of parsing each typo into a structured object
       const [file, line, column, typoDetail] = typo.split(':');
       const typoMatch = typoDetail.match(/`(.*?)` -> `(.*?)`/);
       const [incorrectWord, correctWord] = typoMatch ? typoMatch.slice(1) : [];
@@ -94,13 +97,14 @@ async function processTypos() {
         console.log('------------------------');
 
         const response = await sendPostRequest({
+          githubToken,
           owner,
           repo,
           pullNumber,
           commitId,
           body: 'This is a review comment.',
           path: typo.file,
-          comment: 'Please check this code.',
+          comment: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
           position: typo.line
         });
 
