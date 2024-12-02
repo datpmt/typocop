@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const typoOutput = process.env.TYPO_OUTPUT;
-const githubToken = `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`;
+const githubToken = process.env.GITHUB_TOKEN;
 const repo = process.env.REPO;
 const pullNumber = process.env.PULL_NUMBER;
 const commitId = process.env.COMMIT_ID;
