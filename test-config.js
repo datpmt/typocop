@@ -6,16 +6,8 @@ const repo = process.env.REPO;
 const pullNumber = process.env.PULL_NUMBER;
 const commitId = process.env.COMMIT_ID;
 
-console.log('typoOutput', typoOutput);
-console.log(`GITHUB_TOKEN: ${githubToken}`);
-console.log(`REPO: ${repo}`);
-console.log(`PULL_NUMBER: ${pullNumber}`);
-console.log(`COMMIT_ID: ${commitId}`);
-
 async function sendPostRequest({ body, path, line }) {
   const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
-
-  console.log('url', url);
 
   const data = {
     side: 'RIGHT',
@@ -38,7 +30,6 @@ async function sendPostRequest({ body, path, line }) {
 
   try {
     const response = await axiosInstance.post(url, data);
-    console.log('Response:', response.data);
     return response.data;
   } catch (error) {
     handleError(error);
@@ -62,8 +53,6 @@ async function processTypos() {
   if (typoOutput) {
     const typoArray = typoOutput.split('\n').map(line => line.trim()).filter(line => line);
 
-    console.log('typoArray', typoArray);
-
     const parsedTypos = typoArray.map(typo => {
       const [file, line, column, typoDetail] = typo.split(':');
       const typoMatch = typoDetail.match(/`(.*?)` -> `(.*?)`/);
@@ -78,8 +67,6 @@ async function processTypos() {
       };
     });
 
-    console.log('parsedTypos', parsedTypos);
-
     if (parsedTypos) {
       for (const typo of parsedTypos) {
         const response = await sendPostRequest({
@@ -87,8 +74,6 @@ async function processTypos() {
           path: typo.file,
           line: typo.line
         });
-
-        console.log('response', response);
       }
     }
   } else {
