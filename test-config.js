@@ -15,6 +15,8 @@ console.log(`COMMIT_ID: ${commitId}`);
 async function sendPostRequest({ body, path, line }) {
   const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
 
+  console.log('url', url);
+
   const data = {
     side: 'RIGHT',
     commit_id: commitId,
@@ -28,16 +30,16 @@ async function sendPostRequest({ body, path, line }) {
   const axiosInstance = axios.create({
     baseURL: 'https://api.github.com',
     headers: {
-      Authorization: `Bearer ${githubToken}`, // Use 'Bearer' instead of 'token'
+      Authorization: `Bearer ${githubToken}`,
       'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',  // Include the required API version header
+      'X-GitHub-Api-Version': '2022-11-28',
     },
   });
 
   try {
     const response = await axiosInstance.post(url, data);
     console.log('Response:', response.data);
-    return response.data;  // Return response for further processing if needed
+    return response.data;
   } catch (error) {
     handleError(error);
   }
@@ -62,7 +64,6 @@ async function processTypos() {
 
     console.log('typoArray', typoArray);
 
-    // Optionally, you could parse these lines into more structured objects
     const parsedTypos = typoArray.map(typo => {
       const [file, line, column, typoDetail] = typo.split(':');
       const typoMatch = typoDetail.match(/`(.*?)` -> `(.*?)`/);
