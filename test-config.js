@@ -12,7 +12,7 @@ console.log(`REPO: ${repo}`);
 console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
-async function sendPostRequest({ githubToken, repo, pullNumber, commitId, body, path, line }) {
+async function sendPostRequest({ body, path, line }) {
   const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
 
   const data = {
@@ -82,10 +82,6 @@ async function processTypos() {
     if (parsedTypos) {
       for (const typo of parsedTypos) {
         const response = await sendPostRequest({
-          owner,
-          repo,
-          pullNumber,
-          commitId,
           body: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
           path: typo.file,
           line: typo.line
