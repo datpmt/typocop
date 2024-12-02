@@ -12,14 +12,15 @@ console.log(`REPO: ${repo}`);
 console.log(`PULL_NUMBER: ${pullNumber}`);
 console.log(`COMMIT_ID: ${commitId}`);
 
-async function sendPostRequest({ githubToken, repo, pullNumber, commitId, comments }) {
-  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/reviews`;
+async function sendPostRequest({ githubToken, repo, pullNumber, commitId, body, path, line }) {
+  const url = `https://api.github.com/repos/${repo}/pulls/${pullNumber}/comments`;
 
   const data = {
+    side: 'RIGHT',
     commit_id: commitId,
-    body: "This is close to perfect! Please address the suggested inline change.",
-    event: 'COMMENT',
-    comments
+    body,
+    path,
+    line
   };
 
   console.log('Sending request with data:', data);
@@ -79,27 +80,19 @@ async function processTypos() {
     console.log('parsedTypos', parsedTypos);
 
     if (parsedTypos) {
-      const comments = parsedTypos.map(typo => {
-        return {
-          path: typo.file,
+      for (const typo of parsedTypos) {
+        const response = await sendPostRequest({
+          owner,
+          repo,
+          pullNumber,
+          commitId,
           body: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
-          side: 'RIGHT',
-          line: typo.line,
-        }
-      });
+          path: typo.file,
+          line: typo.line
+        });
 
-      console.log('comments', comments);
-
-      const response = await sendPostRequest({
-        githubToken,
-        repo,
-        pullNumber,
-        commitId,
-        body: 'This is a review comment.',
-        comments
-      });
-
-      console.log('response', response);
+        console.log('response', response);
+      }
     }
   } else {
     console.log('No typos found.');
