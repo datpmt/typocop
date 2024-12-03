@@ -70,7 +70,7 @@ async function processTypos() {
     if (parsedTypos) {
       for (const typo of parsedTypos) {
         const response = await sendPostRequest({
-          body: `Please check this code. Replace '${typo.incorrectWord}' with '${typo.correctWord}'`,
+          body: `Please check this code. Replace \`${typo.incorrectWord}\` with \`${typo.correctWord}\``,
           path: typo.file,
           line: typo.line
         });

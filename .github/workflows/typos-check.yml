@@ -32,41 +32,25 @@ jobs:
             echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
           fi
 
-      - name: Check if files have changed
-        id: check-files
-        run: |
-          if [ "${{ env.CHANGED_FILES }}" == "true" ]; then
-            echo "Files have changed."
-            echo "RUN_SCRIPTS=true" >> $GITHUB_ENV
-          else
-            echo "No files changed."
-            echo "RUN_SCRIPTS=false" >> $GITHUB_ENV
-          fi
-
       - name: Set up Python
-        if: ${{ env.RUN_SCRIPTS == 'true' }}
         uses: actions/setup-python@v3
         with:
           python-version: '3.14.0-alpha.1'
 
       - name: Install typos
-        if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
           python3 -m pip install --upgrade pip
           pip install typos
 
       - name: Set up Node.js
-        if: ${{ env.RUN_SCRIPTS == 'true' }}
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
       - name: Install Axios via npm
-        if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: npm install axios
 
       - name: Check typos in changed files and comment on PR
-        if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: |
           set -e
           echo "Checking typos in changed files..."
