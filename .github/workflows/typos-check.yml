@@ -8,23 +8,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.14.0-alpha.1'
-
-      # Step 3: Install the typos checker
-      - name: Install typos
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install typos
-
-      # Step 4: Get the list of changed files
       - name: Get changed files
         id: changed-files
         run: |
@@ -46,7 +32,6 @@ jobs:
             echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
           fi
 
-      # Step 5: Check if files have changed
       - name: Check if files have changed
         id: check-files
         run: |
@@ -58,12 +43,26 @@ jobs:
             echo "RUN_SCRIPTS=false" >> $GITHUB_ENV
           fi
 
+      - name: Set up Python
+        if: ${{ env.RUN_SCRIPTS == 'true' }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.14.0-alpha.1'
+
+      - name: Install typos
+        if: ${{ env.RUN_SCRIPTS == 'true' }}
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install typos
+
       - name: Set up Node.js
+        if: ${{ env.RUN_SCRIPTS == 'true' }}
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
       - name: Install Axios via npm
+        if: ${{ env.RUN_SCRIPTS == 'true' }}
         run: npm install axios
 
       - name: Check typos in changed files and comment on PR
