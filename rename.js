@@ -78,8 +78,7 @@ async function processTypos() {
         const correctWord = typo.correctWord;
         const execCommandLine = `git show HEAD:${file} | sed -n '${line}p'`;
         console.log('execCommandLine', execCommandLine);
-        let suggestion = '';
-        exec(execCommandLine, (err, stdout, stderr) => {
+        const suggestion = exec(execCommandLine, (err, stdout, stderr) => {
           if (err) {
             console.error(err);
             return;
@@ -88,8 +87,8 @@ async function processTypos() {
             console.error('Lỗi stderr:', stderr);
             return;
           }
-          console.log('stdout', stdout);
-          suggestion = `\`\`\`suggestion\n${stdout.replace(incorrectWord, correctWord)}\n\`\`\``
+          suggestion = stdout.replace(incorrectWord, correctWord);
+          return `\`\`\`suggestion\n${suggestion}\n\`\`\``
         });
 
         await sendPostRequest({
