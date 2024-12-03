@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { exec } = require('child_process');
 
 const typoOutput = process.env.TYPO_OUTPUT;
 const githubToken = process.env.GITHUB_TOKEN;
@@ -67,12 +68,28 @@ async function processTypos() {
       };
     });
 
+    console.log('parsedTypos', parsedTypos);
+
     if (parsedTypos) {
       for (const typo of parsedTypos) {
-        const response = await sendPostRequest({
-          body: `Please check this code. Replace \`${typo.incorrectWord}\` with \`${typo.correctWord}\``,
+        const line = typo.line;
+        let suggestion = '';
+        exec(`git show HEAD:example.rb | sed -n '${line}p'`, (err, stdout, stderr) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          if (stderr) {
+            console.error('Lỗi stderr:', stderr);
+            return;
+          }
+          suggestion = `\`\`\`suggestion\n${stdout.replace(incorrectWord, correctWord)}\n\`\`\``
+        });
+
+        await sendPostRequest({
+          body: suggestion,
           path: typo.file,
-          line: typo.line
+          line,
         });
       }
     }
