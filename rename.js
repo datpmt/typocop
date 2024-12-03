@@ -87,7 +87,7 @@ async function processTypos() {
             console.error('Lỗi stderr:', stderr);
             return;
           }
-          suggestion = stdout.replace(incorrectWord, correctWord);
+          const suggestion = stdout.replace(incorrectWord, correctWord);
           return `\`\`\`suggestion\n${suggestion}\n\`\`\``
         });
 
