@@ -1,6 +1,6 @@
 def greeting(name)
   puts "Hello, #{name}! Welocome to the Ruby typos test."
-  puts 'testt'
+  puts 'languege'
 end
 
 greeting('Alice')
