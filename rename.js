@@ -88,14 +88,17 @@ async function processTypos() {
             return;
           }
           const suggestion = stdout.replace(incorrectWord, correctWord);
+          console.log('suggestion1', suggestion);
           return `\`\`\`suggestion\n${suggestion}\n\`\`\``
         });
 
-        await sendPostRequest({
-          body: suggestion,
-          path: typo.file,
-          line,
-        });
+        console.log('suggestion2', suggestion);
+
+        // await sendPostRequest({
+        //   body: suggestion,
+        //   path: typo.file,
+        //   line,
+        // });
       }
     }
   } else {
