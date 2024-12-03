@@ -1,3 +1,3 @@
-var languege = 'en'
-console.log(languege)
-console.log('welcom')
+var languege = 'en' // typo
+console.log(languege) // typo
+console.log('welcom') // typo

@@ -18,8 +18,6 @@ async function sendPostRequest({ body, path, line }) {
     line
   };
 
-  console.log('Sending request with data:', data);
-
   const axiosInstance = axios.create({
     baseURL: 'https://api.github.com',
     headers: {
@@ -83,8 +81,6 @@ async function processTypos() {
         correctWord: correctWord.trim(),
       };
     });
-
-    console.log('parsedTypos', parsedTypos);
 
     if (parsedTypos) {
       for (const typo of parsedTypos) {

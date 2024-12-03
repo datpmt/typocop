@@ -15,11 +15,8 @@ jobs:
         id: changed-files
         run: |
           set -e
-          echo "Listing changed files..."
-
           git fetch --all
           current_commit=${{ github.event.pull_request.head.sha || github.sha }}
-          echo "Current commit: $current_commit"
 
           changed_files=$(git show --pretty="" --name-only $current_commit || true)
           echo "Changed files: $changed_files"
@@ -53,26 +50,17 @@ jobs:
       - name: Check typos in changed files and comment on PR
         run: |
           set -e
-          echo "Checking typos in changed files..."
 
-          # Loop through each changed file
           while IFS= read -r file; do
-            echo "Checking typos in $file"
-
-            # Run typos checker and capture output, including errors
             typos_output=$(typos "$file" --format brief 2>&1) || true
 
-            # Check if typos output exists
             if [[ -n "$typos_output" ]]; then
-              echo "Typos found in $file:"
-              echo "$typos_output"
-
               TYPO_OUTPUT="$typos_output" \
               GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
               REPO=${{ github.repository }} \
               PULL_NUMBER=${{ github.event.pull_request.number }} \
               COMMIT_ID=${{ github.event.pull_request.head.sha || github.sha }} \
-              node rename.js
+              node typos-check.js
             else
               echo "No typos found in $file."
             fi
