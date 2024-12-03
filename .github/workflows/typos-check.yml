@@ -32,12 +32,10 @@ jobs:
           echo "Listing changed files..."
 
           git fetch --all
-          base_commit=$(git rev-parse origin/${{ github.base_ref }})
           current_commit=$(git rev-parse HEAD)
-          echo "Base commit: $base_commit"
           echo "Current commit: $current_commit"
 
-          changed_files=$(git diff --name-only $base_commit $current_commit || true)
+          changed_files=$(git show --pretty="" --name-only current_commit || true)
           echo "Changed files: $changed_files"
 
           if [ -z "$changed_files" ]; then
@@ -91,7 +89,7 @@ jobs:
               REPO=${{ github.repository }} \
               PULL_NUMBER=${{ github.event.pull_request.number }} \
               COMMIT_ID=${{ github.event.pull_request.head.sha || github.sha }} \
-              node test-config.js
+              node rename.js
             else
               echo "No typos found in $file."
             fi

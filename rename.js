@@ -77,7 +77,7 @@ async function processTypos() {
       }
     }
   } else {
-    console.log('No typos found.');
+    console.log('No typos found!');
   }
 }
 
