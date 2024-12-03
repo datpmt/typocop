@@ -50,6 +50,22 @@ function handleError(error) {
   }
 }
 
+const execPromise = (command) => {
+  return new Promise((resolve, reject) => {
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (stderr) {
+        reject(stderr);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+};
+
 async function processTypos() {
   if (typoOutput) {
     const typoArray = typoOutput.split('\n').map(line => line.trim()).filter(line => line);
@@ -77,27 +93,13 @@ async function processTypos() {
         const incorrectWord = typo.incorrectWord;
         const correctWord = typo.correctWord;
         const execCommandLine = `git show HEAD:${file} | sed -n '${line}p'`;
-        console.log('execCommandLine', execCommandLine);
-        const suggestion = exec(execCommandLine, (err, stdout, stderr) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          if (stderr) {
-            console.error('Lỗi stderr:', stderr);
-            return;
-          }
-          const suggestion = stdout.replace(incorrectWord, correctWord);
-          console.log('suggestion1', suggestion);
-          return `\`\`\`suggestion\n${suggestion}\n\`\`\``
-        });
-
-        console.log('suggestion2', suggestion);
-
+        const stdout = await execPromise(execCommandLine);
+        const suggestion = stdout.replace(incorrectWord, correctWord);
+        console.log(suggestion);
         // await sendPostRequest({
         //   body: suggestion,
-        //   path: typo.file,
-        //   line,
+        //   path: file,
+        //   line: line,
         // });
       }
     }
