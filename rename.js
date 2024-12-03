@@ -95,9 +95,7 @@ async function processTypos() {
         const execCommandLine = `git show HEAD:${file} | sed -n '${line}p'`;
         const stdout = await execPromise(execCommandLine);
         const suggestionContent = stdout.replace(incorrectWord, correctWord);
-        const body = `\`\`\`suggestion\n${suggestionContent}\n\`\`\``
-
-        console.log('body', body);
+        const body = `\`\`\`suggestion\n${suggestionContent}\`\`\`\nPlease check this typo. Replace \`${incorrectWord}\` with \`${correctWord}\`.`
 
         await sendPostRequest({
           body,
