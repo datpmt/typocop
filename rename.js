@@ -72,11 +72,14 @@ async function processTypos() {
 
     if (parsedTypos) {
       for (const typo of parsedTypos) {
+        const file = typo.file;
         const line = typo.line;
         const incorrectWord = typo.incorrectWord;
         const correctWord = typo.correctWord;
+        const execCommandLine = `git show HEAD:${file} | sed -n '${line}p'`;
+        console.log('execCommandLine', execCommandLine);
         let suggestion = '';
-        exec(`git show HEAD:example.rb | sed -n '${line}p'`, (err, stdout, stderr) => {
+        exec(execCommandLine, (err, stdout, stderr) => {
           if (err) {
             console.error(err);
             return;
@@ -85,6 +88,7 @@ async function processTypos() {
             console.error('Lỗi stderr:', stderr);
             return;
           }
+          console.log('stdout', stdout);
           suggestion = `\`\`\`suggestion\n${stdout.replace(incorrectWord, correctWord)}\n\`\`\``
         });
 
