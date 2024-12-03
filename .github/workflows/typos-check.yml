@@ -35,7 +35,7 @@ jobs:
           current_commit=$(git rev-parse HEAD)
           echo "Current commit: $current_commit"
 
-          changed_files=$(git show --pretty="" --name-only current_commit || true)
+          changed_files=$(git show --pretty="" --name-only $current_commit || true)
           echo "Changed files: $changed_files"
 
           if [ -z "$changed_files" ]; then
