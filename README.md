@@ -13,7 +13,7 @@ This GitHub Action automatically checks for typos in the files changed in a pull
 
 ## Usage
 
-- Copy content `typos-check.yml` and `typos-check.js`.
+- Copy content `.github/workflows/typos-check.yml` and `typos-check.js` into your project.
 - Create new PR.
 
 ## Contributors
