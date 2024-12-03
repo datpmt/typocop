@@ -94,13 +94,16 @@ async function processTypos() {
         const correctWord = typo.correctWord;
         const execCommandLine = `git show HEAD:${file} | sed -n '${line}p'`;
         const stdout = await execPromise(execCommandLine);
-        const suggestion = stdout.replace(incorrectWord, correctWord);
-        console.log(suggestion);
-        // await sendPostRequest({
-        //   body: suggestion,
-        //   path: file,
-        //   line: line,
-        // });
+        const suggestionContent = stdout.replace(incorrectWord, correctWord);
+        const body = `\`\`\`suggestion\n${suggestionContent}\n\`\`\``
+
+        console.log('body', body);
+
+        await sendPostRequest({
+          body,
+          path: file,
+          line,
+        });
       }
     }
   } else {
