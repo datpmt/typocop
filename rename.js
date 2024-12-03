@@ -73,6 +73,8 @@ async function processTypos() {
     if (parsedTypos) {
       for (const typo of parsedTypos) {
         const line = typo.line;
+        const incorrectWord = typo.incorrectWord;
+        const correctWord = typo.correctWord;
         let suggestion = '';
         exec(`git show HEAD:example.rb | sed -n '${line}p'`, (err, stdout, stderr) => {
           if (err) {
