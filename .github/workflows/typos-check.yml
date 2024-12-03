@@ -32,7 +32,7 @@ jobs:
           echo "Listing changed files..."
 
           git fetch --all
-          current_commit=$(git rev-parse HEAD)
+          current_commit=${{ github.event.pull_request.head.sha || github.sha }}
           echo "Current commit: $current_commit"
 
           changed_files=$(git show --pretty="" --name-only $current_commit || true)
