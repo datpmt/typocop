@@ -1,0 +1,33 @@
+name: Check Typos in Pull Request
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          set -e
+          git fetch --all
+          current_commit=${{ github.event.pull_request.head.sha || github.sha }}
+
+          changed_files=$(git show --pretty="" --name-only $current_commit || true)
+          echo "Changed files: $changed_files"
+
+          if [ -z "$changed_files" ]; then
+            echo "CHANGED_FILES=false" >> $GITHUB_ENV
+          else
+            echo "CHANGED_FILES=true" >> $GITHUB_ENV
+            echo "$changed_files" | tr ' ' '\n' > changed_files.txt
+            echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
+          fi
+
+      - name: Run Ruby Action
+        uses: ./
+        with:
+          CHANGED_FILE_LIST: ${{ env.CHANGED_FILE_LIST }}

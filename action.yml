@@ -1,0 +1,29 @@
+name: 'My Ruby Action'
+description: 'A GitHub Action written in Ruby that processes input.'
+inputs:
+  changed_file_list:
+    description: 'Input to be processed by the action'
+    required: true
+    default: 'Hello, World!'
+
+outputs:
+  my_output:
+    description: 'Output after processing'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+
+    - name: Install dependencies
+      run: |
+        gem install octokit json
+
+    - name: Run Ruby script
+      run: |
+        ruby script.rb
+      env:
+        CHANGED_FILE_LIST: ${{ inputs.changed_file_list }}
