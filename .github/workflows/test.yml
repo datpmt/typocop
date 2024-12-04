@@ -24,7 +24,7 @@ jobs:
           else
             echo "CHANGED_FILES=true" >> $GITHUB_ENV
             echo "$changed_files" | tr ' ' '\n' > changed_files.txt
-            echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
+            echo "CHANGED_FILE_LIST=$(cat changed_files.txt)" >> $GITHUB_ENV
           fi
 
       - name: Run Ruby Action
