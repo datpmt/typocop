@@ -46,19 +46,18 @@ jobs:
           TYPO_OUTPUTS=""
 
           while IFS= read -r file; do
-            typos_output=$(typos "$file" --format brief 2>&1) || true
+            typo_outputs=$(typos "$file" --format brief 2>&1) || true
 
-            if [[ -n "$typos_output" ]]; then
-              TYPO_OUTPUTS+="$typos_output"
+            if [[ -n "$typo_outputs" ]]; then
+              TYPO_OUTPUTS+="$typo_outputs"
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
-          echo "TYPO_OUTPUTS: $TYPO_OUTPUTS"
-          encoded_typos_output=$(echo "$TYPO_OUTPUTS" | base64 -w 0)
-          echo "encoded_typos_output: $encoded_typos_output"
-          echo "TYPO_OUTPUTS=$encoded_typos_output" >> $GITHUB_ENV
+          encoded_typo_outputs=$(echo "$TYPO_OUTPUTS" | base64 -w 0)
+          echo "encoded_typo_outputs: $encoded_typo_outputs"
+          echo "ENCODED_TYPO_OUTPUTS=$encoded_typo_outputs" >> $GITHUB_ENV
 
       - name: Run Ruby Action
         uses: ./
         with:
-          changed_file_list: "test"
+          encoded_typo_outputs: ${{ env.ENCODED_TYPO_OUTPUTS }}
