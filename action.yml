@@ -23,8 +23,8 @@ runs:
         gem install octokit json
 
     - name: Run Ruby script
-      shell: bash
       run: |
         ruby script.rb
       env:
         CHANGED_FILE_LIST: ${{ inputs.changed_file_list }}
+      shell: bash
