@@ -49,13 +49,13 @@ jobs:
             typos_output=$(typos "$file" --format brief 2>&1) || true
 
             if [[ -n "$typos_output" ]]; then
-              echo "typos_output: $typos_output"
-              TYPO_OUTPUTS+="$typos_output|"
+              TYPO_OUTPUTS+="$typos_output"
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
-          echo "TYPO_OUTPUTS: $TYPO_OUTPUTS"
-          encoded_typos_output=$(echo "$TYPO_OUTPUTS" | base64)
+          clean_output=$(echo "$TYPO_OUTPUTS" | tr '\n' '|')
+          echo "clean_output: $clean_output"
+          encoded_typos_output=$(echo "$clean_output" | base64)
           echo "encoded_typos_output: $encoded_typos_output"
           echo "TYPO_OUTPUTS=$encoded_typos_output" >> $GITHUB_ENV
 
