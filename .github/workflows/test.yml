@@ -19,16 +19,43 @@ jobs:
           changed_files=$(git show --pretty="" --name-only $current_commit || true)
           echo "Changed files: $changed_files"
 
-          if [ -z "$changed_files" ]; then
-            echo "CHANGED_FILES=false" >> $GITHUB_ENV
-          else
-            echo "CHANGED_FILES=true" >> $GITHUB_ENV
-            echo "$changed_files" | tr ' ' '\n' > changed_files.txt
-            changed_file_list=$(cat changed_files.txt | tr -s '\n' ' ' | xargs)
-            echo "CHANGED_FILE_LIST=$changed_file_list" >> $GITHUB_ENV
-          fi
+          echo "$changed_files" | tr ' ' '\n' > changed_files.txt
+          echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.14.0-alpha.1'
+
+      - name: Install typos
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install typos
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Axios via npm
+        run: npm install axios
+
+      - name: Check typos in changed files and comment on PR
+        run: |
+          set -e
+
+          while IFS= read -r file; do
+            typos_output=$(typos "$file" --format brief 2>&1) || true
+
+            if [[ -n "$typos_output" ]]; then
+              TYPO_OUTPUTS+="$typos_output "
+            fi
+          done < ${{ env.CHANGED_FILE_LIST }}
+
+          echo "TYPO_OUTPUTS=$TYPO_OUTPUTS" >> $GITHUB_ENV
+          echo "TYPO_OUTPUTS: $TYPO_OUTPUTS"
 
       - name: Run Ruby Action
         uses: ./
         with:
-          changed_file_list: ${{ env.CHANGED_FILE_LIST }}
+          changed_file_list: "test"
