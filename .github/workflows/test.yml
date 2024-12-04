@@ -49,7 +49,7 @@ jobs:
             typos_output=$(typos "$file" --format brief 2>&1) || true
 
             if [[ -n "$typos_output" ]]; then
-              TYPO_OUTPUTS+="$typos_output\n"
+              TYPO_OUTPUTS+="$typos_output|"
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
