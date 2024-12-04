@@ -1,7 +1,7 @@
 name: 'My Ruby Action'
 description: 'A GitHub Action written in Ruby that processes input.'
 inputs:
-  changed_file_list:
+  encoded_typo_outputs:
     description: 'Input to be processed by the action'
     required: true
     default: 'Hello, World!'
@@ -27,5 +27,5 @@ runs:
       run: |
         ruby typocop.rb
       env:
-        CHANGED_FILE_LIST: ${{ inputs.changed_file_list }}
+        ENCODED_TYPO_OUTPUTS: ${{ inputs.encoded_typo_outputs }}
       shell: bash

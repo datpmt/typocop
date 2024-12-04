@@ -1,12 +1,14 @@
 # script.rb
 
-changed_file_list = ENV['CHANGED_FILE_LIST'] || ''
+require 'base64'
 
-if changed_file_list.empty?
-  puts 'No files changed.'
+encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || ''
+
+if encoded_typo_outputs.empty?
+  puts 'No typo ouput.'
 else
-  files = changed_file_list.split
-  files.each do |file|
-    puts "Changed file: #{file}"
+  typos = Base64.decode64(encoded_typo_outputs).split("\n")
+  typos.each do |typo|
+    puts "Typo: #{typo}"
   end
 end
