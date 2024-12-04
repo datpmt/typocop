@@ -53,9 +53,8 @@ jobs:
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
-          clean_output=$(echo "$TYPO_OUTPUTS" | tr '\n' '|')
-          echo "clean_output: $clean_output"
-          encoded_typos_output=$(echo "$clean_output" | base64)
+          echo "TYPO_OUTPUTS: $TYPO_OUTPUTS"
+          encoded_typos_output=$(echo "$TYPO_OUTPUTS" | base64 -w 0)
           echo "encoded_typos_output: $encoded_typos_output"
           echo "TYPO_OUTPUTS=$encoded_typos_output" >> $GITHUB_ENV
 
