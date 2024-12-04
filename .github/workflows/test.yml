@@ -49,12 +49,14 @@ jobs:
             typos_output=$(typos "$file" --format brief 2>&1) || true
 
             if [[ -n "$typos_output" ]]; then
-              TYPO_OUTPUTS+="$typos_output|"
+              TYPO_OUTPUTS+="$typos_output\n"
             fi
           done < ${{ env.CHANGED_FILE_LIST }}
 
-          echo "TYPO_OUTPUTS=$TYPO_OUTPUTS" >> $GITHUB_ENV
           echo "TYPO_OUTPUTS: $TYPO_OUTPUTS"
+          encoded_typos_output=$(echo "$TYPO_OUTPUTS" | base64)
+          echo "encoded_typos_output: $encoded_typos_output"
+          echo "TYPO_OUTPUTS=$encoded_typos_output" >> $GITHUB_ENV
 
       - name: Run Ruby Action
         uses: ./
