@@ -30,4 +30,4 @@ jobs:
       - name: Run Ruby Action
         uses: ./
         with:
-          CHANGED_FILE_LIST: ${{ env.CHANGED_FILE_LIST }}
+          changed_file_list: ${{ env.CHANGED_FILE_LIST }}
