@@ -17,10 +17,12 @@ runs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.1'
+      shell: bash
 
     - name: Install dependencies
       run: |
         gem install octokit json
+      shell: bash
 
     - name: Run Ruby script
       run: |
