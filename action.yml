@@ -13,6 +13,9 @@ inputs:
   commit_id:
     description: 'Commit ID'
     required: true
+  github_base_ref:
+    description: 'GitHub Base Reference'
+    required: true
 
 outputs:
   my_output:
@@ -39,4 +42,5 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PULL_REQUEST_ID: ${{ inputs.pull_request_id }}
         COMMIT_ID: ${{ inputs.commit_id }}
+        GITHUB_BASE_REF: ${{ inputs.github_base_ref }}
       shell: bash

@@ -9,6 +9,7 @@ encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0O
 @github_token = ENV['GITHUB_TOKEN'] || ''
 @pull_request_id = ENV['PULL_REQUEST_ID']
 @commit_id = ENV['COMMIT_ID']
+@github_base_ref = ENV['GITHUB_BASE_REF']
 
 puts "@commit_id: #{@commit_id}"
 
@@ -38,10 +39,9 @@ end
 if encoded_typo_outputs.empty?
   puts 'No typo output.'
 else
-  commit = 'origin/main'
   repo = Rugged::Repository.new('.')
   head = repo.head.target
-  merge_base = repo.merge_base(commit, head)
+  merge_base = repo.merge_base(@github_base_ref, head)
   patches = repo.diff(merge_base, head).select { |patch| patch.additions.positive? }
 
   client = Octokit::Client.new(access_token: @github_token)
@@ -75,7 +75,7 @@ else
         repo_name = match[:repo_name]
         puts "repo.head.target_id: #{repo.head.target_id}"
         puts "repo.head.target.oid: #{repo.head.target.oid}"
-        create_comment(client, repo_name, body, repo.head.target.oid, typo.path, typo.line)
+        create_comment(client, repo_name, body, @commit_id, typo.path, typo.line)
       end
     end
   end
