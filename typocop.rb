@@ -11,6 +11,10 @@ encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0O
 @commit_id = ENV['COMMIT_ID']
 @github_base_ref = ENV['GITHUB_BASE_REF'] || 'main'
 
+@github_base_ref.prepend('origin/') unless @github_base_ref.start_with?('origin/')
+
+puts "@github_base_ref: #{@github_base_ref}"
+
 puts "@commit_id: #{@commit_id}"
 
 def create_comment(client, repo, body, commit_id, path, line)
