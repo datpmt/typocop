@@ -25,7 +25,7 @@ runs:
 
     - name: Install dependencies
       run: |
-        gem install octokit json
+        gem install octokit json rugged
       shell: bash
 
     - name: Run Typocop
