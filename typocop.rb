@@ -67,7 +67,8 @@ else
         BODY
 
         puts "body: #{body}"
-        create_comment(client, repo, body, repo.head.target_id, typo.path, typo.line)
+        repo_name = repo.remotes.first.url.split(':')[1].split('.git')[0]
+        create_comment(client, repo_name, body, repo.head.target_id, typo.path, typo.line)
       end
     end
   end
