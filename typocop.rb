@@ -68,7 +68,7 @@ else
 
         puts "body: #{body}"
         repo_remote_url = repo.remotes.first.url
-        match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>[^/]+/[^/]+)(?:\.git)?\z}.match(repo_remote_url)
+        match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>.*?)(?:\.git)?\z}.match(repo_remote_url)
         repo_name = match[:repo_name]
         create_comment(client, repo_name, body, repo.head.target_id, typo.path, typo.line)
       end

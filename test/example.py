@@ -23,5 +23,6 @@ age = int(input("Enter your age: "))
 if age >= 18:
     print("You are elligible for an adult privilege.") # typo
     print("You are elligible for an adult privilege.") # typo
+    print("You are elligible for an adult privilege.") # typo
 else:
     print("You are underage, so no adult privileges for you.")
