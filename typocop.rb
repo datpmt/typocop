@@ -9,7 +9,7 @@ encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0O
 @github_token = ENV['GITHUB_TOKEN'] || ''
 @pull_request_id = ENV['PULL_REQUEST_ID']
 @commit_id = ENV['COMMIT_ID']
-@github_base_ref = ENV['GITHUB_BASE_REF']
+@github_base_ref = ENV['GITHUB_BASE_REF'] || 'main'
 
 puts "@commit_id: #{@commit_id}"
 
@@ -75,6 +75,7 @@ else
         repo_name = match[:repo_name]
         puts "repo.head.target_id: #{repo.head.target_id}"
         puts "repo.head.target.oid: #{repo.head.target.oid}"
+        puts "head.oid: #{head.oid}"
         create_comment(client, repo_name, body, @commit_id, typo.path, typo.line)
       end
     end
