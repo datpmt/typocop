@@ -12,6 +12,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug Git State
+        run: |
+          git fetch origin ${{ github.base_ref }}
+
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
