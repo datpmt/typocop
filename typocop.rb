@@ -56,7 +56,7 @@ else
       added_lines = lines.select(&:addition?)
 
       added_lines.each do |line|
-        next if typo.line != line.new_lineno && line.content.include?(typo.incorrect_word)
+        next if typo.line != line.new_lineno || !line.content.include?(typo.incorrect_word)
 
         suggestion_content = line.content.gsub(typo.incorrect_word, typo.correct_word)
 
@@ -67,7 +67,9 @@ else
         BODY
 
         puts "body: #{body}"
-        repo_name = repo.remotes.first.url.split(':')[1].split('.git')[0]
+        repo_remote_url = repo.remotes.first.url
+        match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>[^/]+/[^/]+)(?:\.git)?\z}.match(repo_remote_url)
+        repo_name = match[:repo_name]
         create_comment(client, repo_name, body, repo.head.target_id, typo.path, typo.line)
       end
     end
