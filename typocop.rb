@@ -9,9 +9,7 @@ encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0O
 @github_token = ENV['GITHUB_TOKEN'] || ''
 @pull_request_id = ENV['PULL_REQUEST_ID']
 @commit_id = ENV['COMMIT_ID']
-github_base_ref = ENV['GITHUB_BASE_REF']
-@base_branch = github_base_ref || 'main'
-@base_branch.prepend('origin/') unless @base_branch.start_with?('origin/')
+@github_base_ref = ENV['GITHUB_BASE_REF']
 
 puts "@base_branch: #{@base_branch}"
 
@@ -45,7 +43,8 @@ if encoded_typo_outputs.empty?
 else
   repo = Rugged::Repository.new('.')
   head = repo.head.target
-  merge_base = repo.merge_base(@base_branch, head)
+  base_branch = @github_base_ref.start_with?('origin/') ? @github_base_ref : "origin/#{@github_base_ref}"
+  merge_base = repo.merge_base(base_branch, head)
   patches = repo.diff(merge_base, head).select { |patch| patch.additions.positive? }
 
   client = Octokit::Client.new(access_token: @github_token)
