@@ -1,4 +1,4 @@
-# script.rb
+# typocop.rb
 
 require 'base64'
 require 'rugged'
@@ -9,11 +9,11 @@ encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0O
 @github_token = ENV['GITHUB_TOKEN'] || ''
 @pull_request_id = ENV['PULL_REQUEST_ID']
 @commit_id = ENV['COMMIT_ID']
-@github_base_ref = ENV['GITHUB_BASE_REF'] || 'main'
+github_base_ref = ENV['GITHUB_BASE_REF']
+@base_branch = github_base_ref || 'main'
+@base_branch.prepend('origin/') unless @base_branch.start_with?('origin/')
 
-@github_base_ref.prepend('origin/') unless @github_base_ref.start_with?('origin/')
-
-puts "@github_base_ref: #{@github_base_ref}"
+puts "@base_branch: #{@base_branch}"
 
 puts "@commit_id: #{@commit_id}"
 
@@ -45,7 +45,7 @@ if encoded_typo_outputs.empty?
 else
   repo = Rugged::Repository.new('.')
   head = repo.head.target
-  merge_base = repo.merge_base(@github_base_ref, head)
+  merge_base = repo.merge_base(@base_branch, head)
   patches = repo.diff(merge_base, head).select { |patch| patch.additions.positive? }
 
   client = Octokit::Client.new(access_token: @github_token)
