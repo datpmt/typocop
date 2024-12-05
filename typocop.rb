@@ -2,7 +2,7 @@
 
 require 'base64'
 require 'rugged'
-require 'pry'
+# require 'pry'
 require 'octokit'
 
 encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0OjIwOiBgZWxsaWdpYmxlYCAtPiBgZWxpZ2libGVgCnRlc3QvZXhhbXBsZS5weToyNToyMDogYGVsbGlnaWJsZWAgLT4gYGVsaWdpYmxlYAp0ZXN0L2V4YW1wbGUucHk6MjY6MjA6IGBlbGxpZ2libGVgIC0+IGBlbGlnaWJsZWAKdGVzdC9leGFtcGxlLnJiOjM6OTogYGxhbmd1ZWdlYCAtPiBgbGFuZ3VhZ2VgCnRlc3QvZXhhbXBsZS5yYjo0Ojk6IGBrbm93bGVnZWAgLT4gYGtub3dsZWRnZWAKdGVzdC9leGFtcGxlLnJiOjU6OTogYGtub3dsZWdlYCAtPiBga25vd2xlZGdlYAoK'
