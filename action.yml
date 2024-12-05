@@ -2,9 +2,14 @@ name: 'My Ruby Action'
 description: 'A GitHub Action written in Ruby that processes input.'
 inputs:
   encoded_typo_outputs:
-    description: 'Input to be processed by the action'
+    description: 'Encoded Typo Ouputs'
     required: true
-    default: 'Hello, World!'
+  github_token:
+    description: 'GitHub Token'
+    required: true
+  pull_request_id:
+    description: 'Pull Request ID'
+    required: true
 
 outputs:
   my_output:
@@ -28,4 +33,6 @@ runs:
         ruby typocop.rb
       env:
         ENCODED_TYPO_OUTPUTS: ${{ inputs.encoded_typo_outputs }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        PULL_REQUEST_ID: ${{ inputs.pull_request_id }}
       shell: bash
