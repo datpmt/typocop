@@ -8,6 +8,9 @@ require 'octokit'
 encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0OjIwOiBgZWxsaWdpYmxlYCAtPiBgZWxpZ2libGVgCnRlc3QvZXhhbXBsZS5weToyNToyMDogYGVsbGlnaWJsZWAgLT4gYGVsaWdpYmxlYAp0ZXN0L2V4YW1wbGUucHk6MjY6MjA6IGBlbGxpZ2libGVgIC0+IGBlbGlnaWJsZWAKdGVzdC9leGFtcGxlLnJiOjM6OTogYGxhbmd1ZWdlYCAtPiBgbGFuZ3VhZ2VgCnRlc3QvZXhhbXBsZS5yYjo0Ojk6IGBrbm93bGVnZWAgLT4gYGtub3dsZWRnZWAKdGVzdC9leGFtcGxlLnJiOjU6OTogYGtub3dsZWdlYCAtPiBga25vd2xlZGdlYAoK'
 @github_token = ENV['GITHUB_TOKEN'] || ''
 @pull_request_id = ENV['PULL_REQUEST_ID']
+@commit_id = ENV['COMMIT_ID']
+
+puts "@commit_id: #{@commit_id}"
 
 def create_comment(client, repo, body, commit_id, path, line)
   client.create_pull_request_comment(
@@ -70,7 +73,9 @@ else
         repo_remote_url = repo.remotes.first.url
         match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>.*?)(?:\.git)?\z}.match(repo_remote_url)
         repo_name = match[:repo_name]
-        create_comment(client, repo_name, body, repo.head.target_id, typo.path, typo.line)
+        puts "repo.head.target_id: #{repo.head.target_id}"
+        puts "repo.head.target.oid: #{repo.head.target.oid}"
+        create_comment(client, repo_name, body, repo.head.target.oid, typo.path, typo.line)
       end
     end
   end

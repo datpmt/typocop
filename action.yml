@@ -10,6 +10,9 @@ inputs:
   pull_request_id:
     description: 'Pull Request ID'
     required: true
+  commit_id:
+    description: 'Commit ID'
+    required: true
 
 outputs:
   my_output:
@@ -35,4 +38,5 @@ runs:
         ENCODED_TYPO_OUTPUTS: ${{ inputs.encoded_typo_outputs }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PULL_REQUEST_ID: ${{ inputs.pull_request_id }}
+        COMMIT_ID: ${{ inputs.commit_id }}
       shell: bash

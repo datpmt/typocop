@@ -64,3 +64,4 @@ jobs:
           encoded_typo_outputs: ${{ env.ENCODED_TYPO_OUTPUTS }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pull_request_id: ${{ github.event.pull_request.number }}
+          commit_id: ${{ github.event.pull_request.head.sha || github.sha }}
