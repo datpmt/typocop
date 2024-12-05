@@ -10,19 +10,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get changed files
-        id: changed-files
-        run: |
-          set -e
-          git fetch --all
-          current_commit=${{ github.event.pull_request.head.sha || github.sha }}
-
-          changed_files=$(git show --pretty="" --name-only $current_commit || true)
-          echo "Changed files: $changed_files"
-
-          echo "$changed_files" | tr ' ' '\n' > changed_files.txt
-          echo "CHANGED_FILE_LIST=changed_files.txt" >> $GITHUB_ENV
-
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
@@ -33,35 +20,9 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install typos
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Install Axios via npm
-        run: npm install axios
-
-      - name: Check typos in changed files and comment on PR
-        run: |
-          set -e
-          TYPO_OUTPUTS=""
-
-          while IFS= read -r file; do
-            typo_outputs=$(typos "$file" --format brief 2>&1) || true
-
-            if [[ -n "$typo_outputs" ]]; then
-              TYPO_OUTPUTS+="$typo_outputs"$'\n'
-            fi
-          done < ${{ env.CHANGED_FILE_LIST }}
-
-          encoded_typo_outputs=$(echo "$TYPO_OUTPUTS" | base64 -w 0)
-          echo "encoded_typo_outputs: $encoded_typo_outputs"
-          echo "ENCODED_TYPO_OUTPUTS=$encoded_typo_outputs" >> $GITHUB_ENV
-
       - name: Run Ruby Action
         uses: ./
         with:
-          encoded_typo_outputs: ${{ env.ENCODED_TYPO_OUTPUTS }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pull_request_id: ${{ github.event.pull_request.number }}
           commit_id: ${{ github.event.pull_request.head.sha || github.sha }}

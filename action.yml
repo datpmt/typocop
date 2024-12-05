@@ -1,9 +1,6 @@
 name: 'My Ruby Action'
 description: 'A GitHub Action written in Ruby that processes input.'
 inputs:
-  encoded_typo_outputs:
-    description: 'Encoded Typo Ouputs'
-    required: true
   github_token:
     description: 'GitHub Token'
     required: true
@@ -38,7 +35,6 @@ runs:
       run: |
         ruby typocop.rb
       env:
-        ENCODED_TYPO_OUTPUTS: ${{ inputs.encoded_typo_outputs }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PULL_REQUEST_ID: ${{ inputs.pull_request_id }}
         COMMIT_ID: ${{ inputs.commit_id }}

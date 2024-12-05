@@ -5,13 +5,10 @@ require 'rugged'
 # require 'pry'
 require 'octokit'
 
-encoded_typo_outputs = ENV['ENCODED_TYPO_OUTPUTS'] || 'dGVzdC9leGFtcGxlLnB5OjI0OjIwOiBgZWxsaWdpYmxlYCAtPiBgZWxpZ2libGVgCnRlc3QvZXhhbXBsZS5weToyNToyMDogYGVsbGlnaWJsZWAgLT4gYGVsaWdpYmxlYAp0ZXN0L2V4YW1wbGUucHk6MjY6MjA6IGBlbGxpZ2libGVgIC0+IGBlbGlnaWJsZWAKdGVzdC9leGFtcGxlLnJiOjM6OTogYGxhbmd1ZWdlYCAtPiBgbGFuZ3VhZ2VgCnRlc3QvZXhhbXBsZS5yYjo0Ojk6IGBrbm93bGVnZWAgLT4gYGtub3dsZWRnZWAKdGVzdC9leGFtcGxlLnJiOjU6OTogYGtub3dsZWdlYCAtPiBga25vd2xlZGdlYAoK'
 @github_token = ENV['GITHUB_TOKEN'] || ''
 @pull_request_id = ENV['PULL_REQUEST_ID']
 @commit_id = ENV['COMMIT_ID']
-@github_base_ref = ENV['GITHUB_BASE_REF']
-
-puts "@base_branch: #{@base_branch}"
+@github_base_ref = ENV['GITHUB_BASE_REF'] || 'main'
 
 puts "@commit_id: #{@commit_id}"
 
@@ -38,7 +35,10 @@ class Typo
   end
 end
 
-if encoded_typo_outputs.empty?
+typo_outputs = `typos --format brief`
+typo_outputs = typo_outputs.split("\n")
+
+if typo_outputs.empty?
   puts 'No typo output.'
 else
   repo = Rugged::Repository.new('.')
@@ -48,12 +48,15 @@ else
   patches = repo.diff(merge_base, head).select { |patch| patch.additions.positive? }
 
   client = Octokit::Client.new(access_token: @github_token)
-  typo_outputs = Base64.decode64(encoded_typo_outputs).split("\n")
+  puts "repo.head.target_id: #{repo.head.target_id}"
+  puts "repo.head.target.oid: #{repo.head.target.oid}"
+  puts "head.oid: #{head.oid}"
   typo_outputs.each do |typo_output|
     path, line_number, _column, typo_detail = typo_output.split(':')
+    file_path = path.start_with?('./') ? path[2..] : path
     typo_match = /`(.*?)` -> `(.*?)`/.match(typo_detail)
     incorrect_word, correct_word = typo_match ? typo_match.captures : []
-    typo = Typo.new(path, line_number, incorrect_word, correct_word)
+    typo = Typo.new(file_path, line_number, incorrect_word, correct_word)
 
     patches.each do |patch|
       next if patch.delta.new_file[:path] != typo.path
@@ -73,13 +76,11 @@ else
         BODY
 
         puts "body: #{body}"
+        puts "comment on: #{typo.path}:#{typo.line}"
         repo_remote_url = repo.remotes.first.url
         match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>.*?)(?:\.git)?\z}.match(repo_remote_url)
         repo_name = match[:repo_name]
-        puts "repo.head.target_id: #{repo.head.target_id}"
-        puts "repo.head.target.oid: #{repo.head.target.oid}"
-        puts "head.oid: #{head.oid}"
-        create_comment(client, repo_name, body, @commit_id, typo.path, typo.line)
+        # create_comment(client, repo_name, body, @commit_id, typo.path, typo.line)
       end
     end
   end
