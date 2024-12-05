@@ -62,13 +62,12 @@ else
 
         body = <<~BODY
           ```suggestion
-          #{suggestion_content}
-          ```
+          #{suggestion_content}```
           Please check this typo. Replace `#{typo.incorrect_word}` with `#{typo.correct_word}`.
         BODY
 
         puts "body: #{body}"
-        create_comment(client, repo, body, typo.path, typo.line)
+        create_comment(client, repo, body, repo.head.target_id, typo.path, typo.line)
       end
     end
   end
