@@ -31,12 +31,21 @@ class Cop
     @line = line
     @typos = typos
   end
+
+  def incorrect_words
+    @typos.map { |typo| typo[:incorrect_word] }
+  end
+
+  def correct_words
+    @typos.map { |typo| typo[:correct_word] }
+  end
 end
 
 class Comment
-  attr_reader :path, :line, :body, :user_login
+  attr_reader :id, :path, :line, :body, :user_login
 
-  def initialize(path, line, body, user_login)
+  def initialize(id, path, line, body, user_login)
+    @id = id
     @path = path
     @line = line
     @body = body
@@ -44,8 +53,7 @@ class Comment
   end
 end
 
-def contain_incorrect_word?(content, typos)
-  incorrect_words = typos.map { |typo| typo[:incorrect_word] }
+def contain_incorrect_word?(content, incorrect_words)
   incorrect_words.any? { |incorrect_word| content.include?(incorrect_word) }
 end
 
@@ -77,12 +85,25 @@ class Client
 
     pull_comments = @client.pull_request_comments(@repo_name, PULL_ID)
     @pull_comments = pull_comments.map do |comment|
-      Comment.new(comment.path, comment.line, comment.body, comment.user.login)
+      Comment.new(comment.id, comment.path, comment.line, comment.body, comment.user.login)
+    end
+  end
+
+  def run(cops, patch_additions)
+    if cops.empty?
+      delete_all_comments
+      accept_pull_request
+    else
+      remove_accept_pull_request
+      delete_comments(cops)
+      create_comments(cops, patch_additions)
     end
   end
 
   def create_comments(cops, patch_additions)
     cops.each do |cop|
+      next if exist_comment?(cop)
+
       patch_additions.each do |patch|
         next if patch.delta.new_file[:path] != cop.path
 
@@ -90,7 +111,7 @@ class Client
         added_lines = lines.select(&:addition?)
 
         added_lines.each do |line|
-          next if cop.line != line.new_lineno || !contain_incorrect_word?(line.content, cop.typos)
+          next if cop.line != line.new_lineno || !contain_incorrect_word?(line.content, cop.incorrect_words)
 
           suggestion_content = suggestion_content(line.content, cop.typos)
 
@@ -100,9 +121,7 @@ class Client
             #{suggestion_comment(cop.typos)}
           BODY
 
-          next if exist_comment?(cop, body)
-
-          create_comment(body, cop.path, cop.line)
+          # create_comment(body, cop.path, cop.line)
 
           puts "comment on: #{cop.path}:#{cop.line}"
         end
@@ -122,13 +141,73 @@ class Client
     )
   end
 
-  def exist_comment?(cop, body)
-    @pull_comments.any? do |comment|
-      comment.user_login == @client.user.login &&
-        comment.path == cop.path &&
+  def exist_comment?(cop)
+    own_comments.any? do |comment|
+      comment.path == cop.path &&
         comment.line == cop.line &&
-        comment.body == body
+        !(comment.body.split('`') & cop.incorrect_words).empty?
     end
+  end
+
+  def user_login
+    @client.user.login
+  end
+
+  def own_comments
+    @own_comments ||= @pull_comments.select { |comment| comment.user_login == user_login }
+  end
+
+  def delete_comments(cops)
+    own_comments.each do |comment|
+      delete_comment(comment) if should_delete?(comment, cops)
+    end
+  end
+
+  def should_delete?(comment, cops)
+    cops.none? do |cop|
+      cop.path == comment.path &&
+        cop.line == comment.line &&
+        !(cop.incorrect_words & comment.body.split('`')).empty?
+    end
+  end
+
+  def delete_comment(comment)
+    @client.delete_pull_comment(@repo_name, comment.id)
+    puts "delete comment: #{comment.path}:#{comment.line}"
+  end
+
+  def delete_all_comments
+    own_comments.each do |comment|
+      delete_comment(comment)
+    end
+  end
+
+  def accept_pull_request
+    @client.create_pull_request_review(
+      @repo_name,
+      PULL_ID,
+      event: 'APPROVE'
+    )
+  rescue Octokit::UnprocessableEntity => e
+    puts e
+  end
+
+  def pull_request_reviews
+    @pull_request_reviews ||= @client.pull_request_reviews(@repo_name, PULL_ID)
+  end
+
+  def own_pull_request_review
+    @own_pull_request_review ||= pull_request_reviews.find do |review|
+      review.state == 'APPROVED' &&
+        review.user.login == user_login
+    end
+  end
+
+  def remove_accept_pull_request
+    return unless own_pull_request_review
+
+    review_id = own_pull_request_review.id
+    @client.delete_pull_request_review(@repo_name, PULL_ID, review_id)
   end
 end
 
@@ -215,5 +294,5 @@ else
   puts "repo.target_oid: #{repo.target_oid}"
   patch_additions = repo.patch_additions
   client = Client.new(repo.name)
-  client.create_comments(cops_data, patch_additions)
+  client.run(cops_data, patch_additions)
 end
