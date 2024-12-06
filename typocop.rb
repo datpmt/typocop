@@ -2,27 +2,16 @@
 
 require 'base64'
 require 'rugged'
-# require 'pry'
+require 'pry'
 require 'octokit'
 
-@github_token = ENV['GITHUB_TOKEN'] || ''
-@pull_request_id = ENV['PULL_REQUEST_ID']
-@commit_id = ENV['COMMIT_ID']
-@github_base_ref = ENV['GITHUB_BASE_REF'] || 'main'
+GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || ''
+PULL_ID = ENV['PULL_REQUEST_ID']
+COMMIT_ID = ENV['COMMIT_ID']
+GITHUB_BASE_REF = ENV['GITHUB_BASE_REF'] || 'main'
+BASE_BRANCH = GITHUB_BASE_REF.start_with?('origin/') ? GITHUB_BASE_REF : "origin/#{GITHUB_BASE_REF}"
 
-puts "@commit_id: #{@commit_id}"
-
-def create_comment(client, repo, body, commit_id, path, line)
-  client.create_pull_request_comment(
-    repo,
-    @pull_request_id,
-    body,
-    commit_id,
-    path,
-    line,
-    side: 'RIGHT'
-  )
-end
+puts "COMMIT_ID: #{COMMIT_ID}"
 
 class Cops
   attr_reader :path, :line, :cops
@@ -44,37 +33,16 @@ class Cop
   end
 end
 
-typo_outputs = `typos --format brief`
-typo_outputs = typo_outputs.split("\n")
+class Comment
+  attr_reader :path, :line, :body, :user_login
 
-result = typo_outputs.each_with_object({}) do |output, hash|
-  path, line, _column, typo_detail = output.split(':')
-  typo_match = /`(.*?)` -> `(.*?)`/.match(typo_detail)
-  incorrect_word, correct_word = typo_match ? typo_match.captures : []
-
-  path = path.start_with?('./') ? path[2..] : path
-  line = line.to_i
-
-  hash[path] ||= {}
-
-  hash[path][:typos] ||= []
-
-  existing_entry = hash[path][:typos].find { |typo| typo[:line] == line }
-
-  if existing_entry
-    existing_entry[:typos] << { incorrect_word: incorrect_word, correct_word: correct_word }
-  else
-    hash[path][:typos] << { line: line, typos: [{ incorrect_word: incorrect_word, correct_word: correct_word }] }
+  def initialize(path, line, body, user_login)
+    @path = path
+    @line = line
+    @body = body
+    @user_login = user_login
   end
 end
-
-result = result.map do |path, data|
-  data[:typos].map do |entry|
-    { path: path, line: entry[:line], typos: entry[:typos] }
-  end
-end.flatten
-
-cops = Cops.new(result)
 
 def contain_incorrect_word?(content, typos)
   incorrect_words = typos.map { |typo| typo[:incorrect_word] }
@@ -92,47 +60,160 @@ def suggestion_comment(typos)
   comment = typos.map do |typo|
     "`#{typo[:incorrect_word]}` with `#{typo[:correct_word]}`"
   end
-  "Replace #{comment.join(', ')}."
+  "Should replace #{comment.join(', ')}."
 end
+
+class Client
+  attr_reader :pull_comments, :repo_name
+
+  def initialize(repo_name)
+    @client = Octokit::Client.new(
+      api_endpoint: 'https://api.github.com/',
+      web_endpoint: 'https://github.com/',
+      access_token: GITHUB_TOKEN,
+      auto_paginate: true
+    )
+    @repo_name = repo_name
+
+    pull_comments = @client.pull_request_comments(@repo_name, PULL_ID)
+    @pull_comments = pull_comments.map do |comment|
+      Comment.new(comment.path, comment.line, comment.body, comment.user.login)
+    end
+  end
+
+  def create_comments(cops, patch_additions)
+    cops.each do |cop|
+      patch_additions.each do |patch|
+        next if patch.delta.new_file[:path] != cop.path
+
+        lines = patch.hunks.flat_map(&:lines)
+        added_lines = lines.select(&:addition?)
+
+        added_lines.each do |line|
+          next if cop.line != line.new_lineno || !contain_incorrect_word?(line.content, cop.typos)
+
+          suggestion_content = suggestion_content(line.content, cop.typos)
+
+          body = <<~BODY
+            ```suggestion
+            #{suggestion_content}```
+            #{suggestion_comment(cop.typos)}
+          BODY
+
+          next if exist_comment?(cop, body)
+
+          create_comment(body, cop.path, cop.line)
+
+          puts "comment on: #{cop.path}:#{cop.line}"
+        end
+      end
+    end
+  end
+
+  def create_comment(body, path, line)
+    @client.create_pull_request_comment(
+      @repo_name,
+      PULL_ID,
+      body,
+      COMMIT_ID,
+      path,
+      line,
+      side: 'RIGHT'
+    )
+  end
+
+  def exist_comment?(cop, body)
+    @pull_comments.any? do |comment|
+      comment.user_login == @client.user.login &&
+        comment.path == cop.path &&
+        comment.line == cop.line &&
+        comment.body == body
+    end
+  end
+end
+
+class Repo
+  def initialize(path = '.')
+    @repo = Rugged::Repository.new(path)
+  end
+
+  def name
+    match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>.*?)(?:\.git)?\z}.match(remote_url)
+    match[:repo_name]
+  end
+
+  def remote_url
+    @repo.remotes.first.url
+  end
+
+  def head
+    @repo.head
+  end
+
+  def head_target
+    head.target
+  end
+
+  def merge_base
+    @repo.merge_base(BASE_BRANCH, head_target)
+  end
+
+  def diff
+    @repo.diff(merge_base, head_target)
+  end
+
+  def patch_additions
+    diff.select { |patch| patch.additions.positive? }
+  end
+
+  def target_id
+    head.target_id
+  end
+
+  def target_oid
+    head_target.oid
+  end
+end
+
+typo_outputs = `typos --format brief`
+typo_outputs = typo_outputs.split("\n")
 
 if typo_outputs.empty?
   puts 'No typo output.'
 else
-  repo = Rugged::Repository.new('.')
-  head = repo.head.target
-  base_branch = @github_base_ref.start_with?('origin/') ? @github_base_ref : "origin/#{@github_base_ref}"
-  merge_base = repo.merge_base(base_branch, head)
-  patches = repo.diff(merge_base, head).select { |patch| patch.additions.positive? }
+  result = typo_outputs.each_with_object({}) do |output, hash|
+    path, line, _column, typo_detail = output.split(':')
+    typo_match = /`(.*?)` -> `(.*?)`/.match(typo_detail)
+    incorrect_word, correct_word = typo_match ? typo_match.captures : []
 
-  client = Octokit::Client.new(access_token: @github_token)
-  puts "repo.head.target_id: #{repo.head.target_id}"
-  puts "repo.head.target.oid: #{repo.head.target.oid}"
-  puts "head.oid: #{head.oid}"
-  cops.cops.each do |cop|
-    patches.each do |patch|
-      next if patch.delta.new_file[:path] != cop.path
+    path = path.start_with?('./') ? path[2..] : path
+    line = line.to_i
 
-      lines = patch.hunks.flat_map(&:lines)
-      added_lines = lines.select(&:addition?)
+    hash[path] ||= {}
 
-      added_lines.each do |line|
-        next if cop.line != line.new_lineno || !contain_incorrect_word?(line.content, cop.typos)
+    hash[path][:typos] ||= []
 
-        suggestion_content = suggestion_content(line.content, cop.typos)
+    existing_entry = hash[path][:typos].find { |typo| typo[:line] == line }
 
-        body = <<~BODY
-          ```suggestion
-          #{suggestion_content}```
-          #{suggestion_comment(cop.typos)}
-        BODY
-
-        puts "body: #{body}"
-        puts "comment on: #{cop.path}:#{cop.line}"
-        repo_remote_url = repo.remotes.first.url
-        match = %r{(?:https?://)?(?:www\.)?github\.com[/:](?<repo_name>.*?)(?:\.git)?\z}.match(repo_remote_url)
-        repo_name = match[:repo_name]
-        # create_comment(client, repo_name, body, @commit_id, typo.path, typo.line)
-      end
+    if existing_entry
+      existing_entry[:typos] << { incorrect_word: incorrect_word, correct_word: correct_word }
+    else
+      hash[path][:typos] << { line: line, typos: [{ incorrect_word: incorrect_word, correct_word: correct_word }] }
     end
   end
+
+  result = result.map do |path, data|
+    data[:typos].map do |entry|
+      { path: path, line: entry[:line], typos: entry[:typos] }
+    end
+  end.flatten
+
+  cops = Cops.new(result)
+  cops_data = cops.cops
+  repo = Repo.new
+  puts "repo.target_id: #{repo.target_id}"
+  puts "repo.target_oid: #{repo.target_oid}"
+  patch_additions = repo.patch_additions
+  client = Client.new(repo.name)
+  client.create_comments(cops_data, patch_additions)
 end
