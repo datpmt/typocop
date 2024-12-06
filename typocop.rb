@@ -72,16 +72,17 @@ def suggestion_comment(typos)
 end
 
 class Client
-  attr_reader :pull_comments, :repo_name
+  attr_reader :pull_comments, :repo
 
-  def initialize(repo_name)
+  def initialize(repo)
     @client = Octokit::Client.new(
       api_endpoint: 'https://api.github.com/',
       web_endpoint: 'https://github.com/',
       access_token: GITHUB_TOKEN,
       auto_paginate: true
     )
-    @repo_name = repo_name
+    @repo = repo
+    @repo_name = @repo.name
 
     pull_comments = @client.pull_request_comments(@repo_name, PULL_ID)
     @pull_comments = pull_comments.map do |comment|
@@ -89,42 +90,65 @@ class Client
     end
   end
 
-  def run(cops, patch_additions)
-    if cops.empty?
+  def run(cops)
+    current_cops = current_cops(cops)
+    if current_cops.empty?
       delete_all_comments
       accept_pull_request
     else
       remove_accept_pull_request
-      delete_comments(cops)
-      create_comments(cops, patch_additions)
+      delete_comments(current_cops)
+      create_comments(current_cops)
     end
   end
 
-  def create_comments(cops, patch_additions)
+  def current_cops(cops)
+    result_cops = []
+    common_paths = common_paths(cops)
+    common_paths.each do |path|
+      patch_by_path = patch_by_path(path)
+      cops_by_path = cops_by_path(cops, path)
+      cops_lines = patch_by_path.added_lines.map(&:new_lineno) & cops_by_path.map(&:line)
+      next if cops_lines.empty?
+
+      result_cops.concat(cops_by_path.select { |cop| cops_lines.include?(cop.line) })
+    end
+
+    result_cops
+  end
+
+  def common_paths(cops)
+    @repo.patch_additions.map(&:path) & cops.map(&:path)
+  end
+
+  def patch_by_path(path)
+    @repo.patch_additions.find { |patch| patch.path == path }
+  end
+
+  def cops_by_path(cops, path)
+    cops.select { |cop| cop.path == path }
+  end
+
+  def create_comments(cops)
     cops.each do |cop|
       next if exist_comment?(cop)
 
-      patch_additions.each do |patch|
-        next if patch.delta.new_file[:path] != cop.path
+      line_content = line_content(cop)
+      suggestion_content = suggestion_content(line_content, cop.typos)
 
-        lines = patch.hunks.flat_map(&:lines)
-        added_lines = lines.select(&:addition?)
+      body = <<~BODY
+        ```suggestion
+        #{suggestion_content}```
+        #{suggestion_comment(cop.typos)}
+      BODY
 
-        added_lines.each do |line|
-          next if cop.line != line.new_lineno || !contain_incorrect_word?(line.content, cop.incorrect_words)
-
-          suggestion_content = suggestion_content(line.content, cop.typos)
-
-          body = <<~BODY
-            ```suggestion
-            #{suggestion_content}```
-            #{suggestion_comment(cop.typos)}
-          BODY
-
-          create_comment(body, cop.path, cop.line)
-        end
-      end
+      create_comment(body, cop.path, cop.line)
     end
+  end
+
+  def line_content(cop)
+    patch = @repo.patch_additions.find { |patch| patch.path == cop.path }
+    patch.added_lines.find { |line| line.new_lineno == cop.line }.content
   end
 
   def create_comment(body, path, line)
@@ -214,9 +238,28 @@ class Client
   end
 end
 
+class Patch
+  attr_reader :path, :lines, :added_lines
+
+  def initialize(path, lines, added_lines)
+    @path = path
+    @lines = lines
+    @added_lines = added_lines
+  end
+end
+
 class Repo
+  attr_reader :patch_additions
+
   def initialize(path = '.')
     @repo = Rugged::Repository.new(path)
+    patch_additions = diff.select { |patch| patch.additions.positive? }
+    @patch_additions = patch_additions.map do |patch|
+      path = patch.delta.new_file[:path]
+      lines = patch.hunks.flat_map(&:lines)
+      added_lines = lines.select(&:addition?)
+      Patch.new(path, lines, added_lines)
+    end
   end
 
   def name
@@ -242,10 +285,6 @@ class Repo
 
   def diff
     @repo.diff(merge_base, head_target)
-  end
-
-  def patch_additions
-    diff.select { |patch| patch.additions.positive? }
   end
 
   def target_id
@@ -295,7 +334,6 @@ else
   repo = Repo.new
   puts "repo.target_id: #{repo.target_id}"
   puts "repo.target_oid: #{repo.target_oid}"
-  patch_additions = repo.patch_additions
-  client = Client.new(repo.name)
-  client.run(cops_data, patch_additions)
+  client = Client.new(repo)
+  client.run(cops_data)
 end
