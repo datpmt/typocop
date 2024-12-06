@@ -7,6 +7,7 @@ require 'octokit'
 
 GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || ''
 PULL_ID = ENV['PULL_REQUEST_ID']
+GITHUB_BASE_REF = ENV['GITHUB_BASE_REF'] || 'main'
 BASE_BRANCH = GITHUB_BASE_REF.start_with?('origin/') ? GITHUB_BASE_REF : "origin/#{GITHUB_BASE_REF}"
 
 class Cops
