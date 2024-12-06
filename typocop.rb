@@ -2,7 +2,7 @@
 
 require 'base64'
 require 'rugged'
-require 'pry'
+# require 'pry'
 require 'octokit'
 
 GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || ''
