@@ -96,7 +96,7 @@ class Client
       delete_all_comments
       accept_pull_request
     else
-      remove_accept_pull_request
+      dismiss_accept_pull_request
       delete_comments(current_cops)
       create_comments(current_cops)
     end
@@ -230,11 +230,12 @@ class Client
     end
   end
 
-  def remove_accept_pull_request
+  def dismiss_accept_pull_request
     return unless own_pull_request_review
 
     review_id = own_pull_request_review.id
-    @client.delete_pull_request_review(@repo_name, PULL_ID, review_id)
+    message = 'Found new typos.'
+    @client.dismiss_pull_request_review(@repo_name, PULL_ID, review_id, message)
   end
 end
 
