@@ -121,9 +121,7 @@ class Client
             #{suggestion_comment(cop.typos)}
           BODY
 
-          # create_comment(body, cop.path, cop.line)
-
-          puts "comment on: #{cop.path}:#{cop.line}"
+          create_comment(body, cop.path, cop.line)
         end
       end
     end
@@ -139,6 +137,7 @@ class Client
       line,
       side: 'RIGHT'
     )
+    puts "comment on: #{path}:#{line}"
   end
 
   def exist_comment?(cop)
@@ -150,9 +149,11 @@ class Client
   end
 
   def user_login
-    @client.user.login
-  rescue Octokit::Forbidden
-    'github-actions[bot]'
+    @user_login ||= begin
+      @client.user.login
+    rescue Octokit::Forbidden
+      'github-actions[bot]'
+    end
   end
 
   def own_comments
