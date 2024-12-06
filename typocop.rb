@@ -151,6 +151,8 @@ class Client
 
   def user_login
     @client.user.login
+  rescue Octokit::Forbidden
+    'github-actions[bot]'
   end
 
   def own_comments
