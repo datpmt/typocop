@@ -7,11 +7,7 @@ require 'octokit'
 
 GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || ''
 PULL_ID = ENV['PULL_REQUEST_ID']
-COMMIT_ID = ENV['COMMIT_ID']
-GITHUB_BASE_REF = ENV['GITHUB_BASE_REF'] || 'main'
 BASE_BRANCH = GITHUB_BASE_REF.start_with?('origin/') ? GITHUB_BASE_REF : "origin/#{GITHUB_BASE_REF}"
-
-puts "COMMIT_ID: #{COMMIT_ID}"
 
 class Cops
   attr_reader :path, :line, :cops
@@ -90,6 +86,14 @@ class Client
     end
   end
 
+  def pull_request
+    @pull_request ||= @client.pull_request(@repo_name, PULL_ID)
+  end
+
+  def commit_id
+    @commit_id ||= pull_request.head.sha
+  end
+
   def run(cops)
     current_cops = current_cops(cops)
     if current_cops.empty?
@@ -156,7 +160,7 @@ class Client
       @repo_name,
       PULL_ID,
       body,
-      COMMIT_ID,
+      commit_id,
       path,
       line,
       side: 'RIGHT'
@@ -333,8 +337,6 @@ else
   cops = Cops.new(result)
   cops_data = cops.cops
   repo = Repo.new
-  puts "repo.target_id: #{repo.target_id}"
-  puts "repo.target_oid: #{repo.target_oid}"
   client = Client.new(repo)
   client.run(cops_data)
 end
