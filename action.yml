@@ -25,7 +25,7 @@ runs:
 
     - name: Install dependencies
       run: |
-        gem install octokit rugged:1.6.3 typocop
+        gem install typocop
       shell: bash
 
     - name: Run Typocop
