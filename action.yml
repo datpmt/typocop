@@ -25,12 +25,12 @@ runs:
 
     - name: Install dependencies
       run: |
-        gem install octokit json rugged:1.6.3
+        gem install octokit rugged:1.6.3 typocop
       shell: bash
 
     - name: Run Typocop
       run: |
-        ruby typocop.rb
+        typocop execute
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PULL_REQUEST_ID: ${{ inputs.pull_request_id }}

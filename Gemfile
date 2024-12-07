@@ -1,6 +1,6 @@
 # Gemfile
 source 'https://rubygems.org'
 
-gem 'octokit'  # GitHub API client for Ruby
-gem 'json'     # JSON parsing if you're working with JSON data
-gem 'rugged', '>= 0.23.0', '< 1.1.0'
+gem 'cli'
+gem 'octokit', '>= 9.2.0'
+gem 'rugged', '1.6.3'
