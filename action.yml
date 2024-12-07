@@ -1,0 +1,40 @@
+name: 'typocop'
+description: 'Github action comments on PRs with typos or approvals'
+author: "Datpmt <datpmt.2k@gmail.com>"
+repository: "https://github.com/datpmt/typocop"
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  github_token:
+    description: 'GitHub Token'
+    required: true
+  pull_request_id:
+    description: 'Pull Request ID'
+    required: true
+  github_base_ref:
+    description: 'GitHub Base Reference'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+
+    - name: Install dependencies
+      run: |
+        gem install typocop
+      shell: bash
+
+    - name: Run Typocop
+      run: |
+        typocop execute
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        PULL_REQUEST_ID: ${{ inputs.pull_request_id }}
+        GITHUB_BASE_REF: ${{ inputs.github_base_ref }}
+      shell: bash

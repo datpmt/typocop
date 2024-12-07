@@ -1,0 +1,30 @@
+name: Check Typos in Pull Request
+
+on: [pull_request]
+
+jobs:
+  typocop:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.14.0-alpha.1'
+
+      - name: Install typos
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install typos
+
+      - name: Run Typocop Action
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pull_request_id: ${{ github.event.pull_request.number }}
+          github_base_ref: ${{ github.base_ref }}
