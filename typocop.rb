@@ -338,6 +338,7 @@ else
   cops = Cops.new(result)
   cops_data = cops.cops
   repo = Repo.new
+  puts "repo.head.name: #{repo.head.name}"
   client = Client.new(repo)
   client.run(cops_data)
 end
