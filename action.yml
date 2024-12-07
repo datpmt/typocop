@@ -1,5 +1,5 @@
-name: 'My Ruby Action'
-description: 'A GitHub Action written in Ruby that processes input.'
+name: 'Typocop Action'
+description: 'Comment on PRs with typos or approvals'
 inputs:
   github_token:
     description: 'GitHub Token'
@@ -10,10 +10,6 @@ inputs:
   github_base_ref:
     description: 'GitHub Base Reference'
     required: true
-
-outputs:
-  my_output:
-    description: 'Output after processing'
 
 runs:
   using: 'composite'

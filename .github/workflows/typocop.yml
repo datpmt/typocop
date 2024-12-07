@@ -3,7 +3,7 @@ name: Check Typos in Pull Request
 on: [pull_request]
 
 jobs:
-  test:
+  typocop:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +22,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install typos
 
-      - name: Run Ruby Action
+      - name: Run Typocop Action
         uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
