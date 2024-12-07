@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'typocop'
-  s.version     = '0.1.0'
+  s.version     = '0.1.1'
   s.summary     = 'Comment on PRs with typos or approvals'
   s.description = "Typocop integrates with GitHub Actions to automatically comment on pull requests when typos are detected or when a PR is approved, based on [Crate CI's Typos](https://github.com/crate-ci/typos)."
   s.authors     = ['datpmt']
@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
     'changelog_uri' => 'https://github.com/datpmt/typocop/blob/main/CHANGELOG.md'
   }
   s.add_dependency 'octokit', '9.2.0'
+  s.add_dependency 'rugged', '~> 1.6.3'
   s.add_dependency 'thor', '~> 1.3.2'
   s.executables = %w[typocop]
   s.files.each do |file|
