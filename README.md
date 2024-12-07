@@ -1,6 +1,6 @@
 # Check Typos in Pull Request
 
-![image](https://github.com/user-attachments/assets/bbcdcedb-cf0b-4cc0-959a-fe5caa71f833)
+![image](typocop.png)
 
 This GitHub Action automatically checks for typos in the files changed in a pull request. It comments on the pull request with any detected typos and provides suggestions for corrections.
 
@@ -9,11 +9,12 @@ This GitHub Action automatically checks for typos in the files changed in a pull
 - Detects typos in files that are part of the pull request.
 - Provides a brief output of typos found in each file.
 - Comments on the pull request with the results.
+- Approve the PR if no typos.
 - Supports all programing languages.
 
 ## Usage
 
-- Copy content `.github/workflows/typos-check.yml` and `typos-check.js` into your project.
+- Copy file `.github/workflows/typocop.yml` into your project.
 - Create new PR.
 
 ## Contributors
