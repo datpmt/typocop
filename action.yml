@@ -14,7 +14,7 @@ inputs:
     description: 'Pull Request ID'
     required: true
   github_base_ref:
-    description: 'GitHub Base Reference'
+    description: 'GitHub Base Ref'
     required: true
 
 runs:
