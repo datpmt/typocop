@@ -10,6 +10,8 @@ This GitHub Action automatically checks for typos in the files changed in a pull
 - Provides a brief output of typos found in each file.
 - Comments on the pull request with the results.
 - Approve the PR if no typos.
+- Dismiss approvals on pull requests if new commit contains typo.
+- Delete outdated typos comments.
 - Supports all programing languages.
 
 ## Usage
