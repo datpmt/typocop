@@ -21,14 +21,14 @@ runs:
   using: 'composite'
   steps:
     - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.14.0-alpha.1'
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.14.0-alpha.1'
 
-      - name: Install typos
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install typos
+    - name: Install typos
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install typos
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
