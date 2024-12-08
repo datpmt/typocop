@@ -29,6 +29,7 @@ runs:
       run: |
         python3 -m pip install --upgrade pip
         pip install typos
+      shell: bash
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
