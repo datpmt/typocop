@@ -21,7 +21,8 @@ This GitHub Action automatically checks for typos in the files changed in a pull
 
 ## Contributors
 
-- [datpmt](https://github.com/datpmt)
+- Tran Dang Duc Dat [datpmt](https://github.com/datpmt)
+- Hoang Duc Quan [BlazingRockStorm](https://github.com/BlazingRockStorm)
 
 I welcome contributions to this project.
 
