@@ -4,6 +4,7 @@ def greeting(name)
   puts 'knowlege' # typo
   puts 'knowlege: languege' # typo
   puts 'welcom'
+  puts 'knowlege: languege' # typo
 end
 
 greeting('Alice')
