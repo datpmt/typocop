@@ -1,4 +1,5 @@
 # Check Typos in Pull Request
+[![Gem Version](https://badge.fury.io/rb/typocop.svg)](https://badge.fury.io/rb/typocop)
 
 ![Typocop Logo](typocop.png)
 
