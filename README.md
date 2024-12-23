@@ -16,33 +16,44 @@ This GitHub Action automatically checks for typos in the files changed in a pull
 
 ## Usage
 
-1. **Add Typocop GitHub Action to your project:**
+1. **Using Typocop GitHub Action:**
 
-    Copy the `.github/workflows/typocop.yml` file into your project repository.
+    1. Copy the `.github/workflows/typocop.yml` file into your project repository.
 
-    ```yaml
-    name: Check Typos in Pull Request
+        ```yaml
+        # .github/workflows/typocop.yml
+        name: Check Typos in Pull Request
 
-    on: [pull_request]
+        on: [pull_request]
 
-    jobs:
-      typocop:
-        permissions: write-all
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v3
-            with:
-              fetch-depth: 0
+        jobs:
+          typocop:
+            permissions: write-all
+            runs-on: ubuntu-latest
+            steps:
+              - name: Checkout repository
+                uses: actions/checkout@v3
+                with:
+                  fetch-depth: 0
 
-          - name: Run Typocop Action
-            uses: datpmt/typocop@v1.0.2
-            with:
-              github_token: ${{ secrets.GITHUB_TOKEN }}
-              pull_request_id: ${{ github.event.pull_request.number }}
-              github_base_ref: ${{ github.base_ref }}
+              - name: Run Typocop Action
+                uses: datpmt/typocop@v1.0.2
+                with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  pull_request_id: ${{ github.event.pull_request.number }}
+                  github_base_ref: ${{ github.base_ref }}
+        ```
+
+    2. Create a new Pull Request (PR) to trigger the action.
+2. **Using Typocop command line**
+
+    ```bash
+    gem install typocop # install
+
+    GITHUB_TOKEN=your_token PULL_REQUEST_ID=your_pull_request_id typocop execute # run action
     ```
-2. **Create a new Pull Request (PR) to trigger the action.**
+
+    ![Typocop demo](typocop.gif "")
 
 ## Contributing
 
