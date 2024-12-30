@@ -18,3 +18,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pull_request_id: ${{ github.event.pull_request.number }}
           github_base_ref: ${{ github.base_ref }}
+          setting: .github/typocop/setting.yml

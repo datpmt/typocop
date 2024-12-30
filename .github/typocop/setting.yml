@@ -1,0 +1,20 @@
+# Configuration for Typocop - a GitHub Action for checking typos in pull requests
+
+# 'excludes' section allows you to specify files and folders to exclude
+# from the typo-checking process. You can list specific files or use glob
+# patterns to exclude entire directories.
+
+excludes: # Folders and files to exclude from typo checks
+  # Example: Exclude a specific file (e.g., 'exclude.rb' in the 'excludes' folder)
+  - excludes/exclude.rb
+  # Example: Exclude all files in the 'test' folder inside the 'excludes' directory
+  - excludes/test/*
+
+# 'skips' section defines a list of words, file names, or patterns
+# for which Typocop will skip checking for typos. This is useful for common
+# terms or abbreviations you don't want to be flagged as typos.
+
+skips: # Words or patterns to skip typo-checking
+  - rspec
+  # Example: Skip checking for the word 'elligible' (common in testing setups)
+  - elligible

@@ -16,21 +16,14 @@ inputs:
   github_base_ref:
     description: 'GitHub Base Ref'
     required: true
+  setting:
+    description: 'Path to the custom setting.yml file for Typocop'
+    required: false
+    default: '.github/typocop/setting.yml
 
 runs:
   using: 'composite'
   steps:
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.14.0-alpha.1'
-
-    - name: Install typos
-      run: |
-        python3 -m pip install --upgrade pip
-        pip install typos
-      shell: bash
-
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -43,7 +36,7 @@ runs:
 
     - name: Run Typocop
       run: |
-        typocop execute
+        typocop execute --config ${{ inputs.setting }}
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PULL_REQUEST_ID: ${{ inputs.pull_request_id }}

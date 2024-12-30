@@ -9,6 +9,7 @@ require 'typocop/cop'
 require 'typocop/cops'
 require 'typocop/patch'
 require 'typocop/repo'
+require 'typo_checker'
 
 GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || ''
 PULL_ID = ENV['PULL_REQUEST_ID']
@@ -16,45 +17,19 @@ GITHUB_BASE_REF = ENV['GITHUB_BASE_REF'] || 'main'
 BASE_BRANCH = GITHUB_BASE_REF.start_with?('origin/') ? GITHUB_BASE_REF : "origin/#{GITHUB_BASE_REF}"
 
 module Typocop
-  def self.execute
-    typo_outputs = `typos --format brief`
-    typo_outputs = typo_outputs.split("\n")
+  def self.execute(settings)
+    excludes = settings.excludes
+    skips = settings.skips
+    typo_checker = TypoChecker::Checker.new(excludes, skips, stdoutput = false)
+    found_typos = typo_checker.scan_repo('.')
 
-    if typo_outputs.empty?
-      puts 'No typo output.'
+    if found_typos.empty?
+      puts 'No typos.'
     else
-      result = typo_outputs.each_with_object({}) do |output, hash|
-        path, line, _column, typo_detail = output.split(':')
-        typo_match = /`(.*?)` -> `(.*?)`/.match(typo_detail)
-        incorrect_word, correct_word = typo_match ? typo_match.captures : []
-
-        path = path.start_with?('./') ? path[2..] : path
-        line = line.to_i
-
-        hash[path] ||= {}
-
-        hash[path][:typos] ||= []
-
-        existing_entry = hash[path][:typos].find { |typo| typo[:line] == line }
-
-        if existing_entry
-          existing_entry[:typos] << { incorrect_word: incorrect_word, correct_word: correct_word }
-        else
-          hash[path][:typos] << { line: line, typos: [{ incorrect_word: incorrect_word, correct_word: correct_word }] }
-        end
-      end
-
-      result = result.map do |path, data|
-        data[:typos].map do |entry|
-          { path: path, line: entry[:line], typos: entry[:typos] }
-        end
-      end.flatten
-
-      cops = Cops.new(result)
-      cops_data = cops.cops
+      cops = Cops.new(found_typos)
       repo = Repo.new
       client = Client.new(repo)
-      client.execute(cops_data)
+      client.execute(cops.cops)
     end
   end
 end

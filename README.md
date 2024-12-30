@@ -42,9 +42,29 @@ This GitHub Action automatically checks for typos in the files changed in a pull
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   pull_request_id: ${{ github.event.pull_request.number }}
                   github_base_ref: ${{ github.base_ref }}
+                  setting: .github/typocop/setting.yml # Optional: Path to your custom settings file
         ```
 
-    2. Create a new Pull Request (PR) to trigger the action.
+    2. Customize settings (optional):
+
+        By default, Typocop uses predefined settings, but you can create a custom settings file in your repository. For example, create .github/typocop/setting.yml to specify exclusion rules and skip lists.
+
+        Example `.github/typocop/setting.yml`:
+
+          ```yaml
+          excludes:  # Files and directories to exclude
+            - excludes/exclude.rb
+            - excludes/test/*
+
+          skips:  # Words or patterns to skip during typo detection
+            - rspec
+            - eligible
+          ```
+
+        - **excludes**: Specifies files or directories to exclude from typo checking.
+        - **skips**: Specifies words or patterns to skip checking (useful for technical terms or domain-specific language).
+
+    3. Create a new Pull Request (PR) to trigger the action.
 2. **Using Typocop command line**
 
     ```bash
@@ -71,7 +91,7 @@ We welcome contributions to this project! To contribute:
 - Hoang Duc Quan ([BlazingRockStorm](https://github.com/BlazingRockStorm))
 
 ## References
-- [Crate CI - Typos](https://github.com/crate-ci/typos)
+- [Typo Checker](https://github.com/datpmt/typo_checker)
 - [Pronto Labs](https://github.com/prontolabs/pronto)
 
 ## License
