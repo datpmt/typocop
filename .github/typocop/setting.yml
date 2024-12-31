@@ -15,6 +15,7 @@ excludes: # Folders and files to exclude from typo checks
 # terms or abbreviations you don't want to be flagged as typos.
 
 skips: # Words or patterns to skip typo-checking
+  # Example: Skip checking for the word 'rspec' (commonly used in Ruby testing)
   - rspec
   # Example: Skip checking for the word 'elligible' (common in testing setups)
   - elligible
