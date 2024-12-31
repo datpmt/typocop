@@ -19,7 +19,7 @@ inputs:
   setting:
     description: 'Path to the custom setting.yml file for Typocop'
     required: false
-    default: '.github/typocop/setting.yml
+    default: .github/typocop/setting.yml
 
 runs:
   using: 'composite'

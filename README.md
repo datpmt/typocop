@@ -37,7 +37,7 @@ This GitHub Action automatically checks for typos in the files changed in a pull
                   fetch-depth: 0
 
               - name: Run Typocop Action
-                uses: datpmt/typocop@v1.0.2
+                uses: datpmt/typocop@v1.0.4
                 with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   pull_request_id: ${{ github.event.pull_request.number }}
