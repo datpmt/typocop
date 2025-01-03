@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Typocop Action
-        uses: datpmt/typocop@v1.0.4
+        uses: datpmt/typocop@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pull_request_id: ${{ github.event.pull_request.number }}
