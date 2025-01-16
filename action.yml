@@ -45,6 +45,7 @@ runs:
 
     - name: Update Bundler
       run: gem install bundler -v 2.3.5
+      shell: bash
 
     - name: Run Typocop
       run: |
