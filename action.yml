@@ -40,7 +40,7 @@ runs:
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.0.1'
+        ruby-version: '3.4.1'
         bundler-cache: true
 
     - name: Run Typocop
