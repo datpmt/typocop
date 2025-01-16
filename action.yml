@@ -27,27 +27,25 @@ runs:
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.1'
+        ruby-version: '3.0.1'
+        bundler-cache: true
 
-    # Cache Ruby gems (for global installation)
-    - name: Cache Ruby gems
-      uses: actions/cache@v3
-      with:
-        path: ~/.gem
-        key: gem-cache-${{ runner.os }}-ruby-${{ hashFiles('**/*.gemspec') }}-${{ runner.os }}
-        restore-keys: |
-          gem-cache-${{ runner.os }}-ruby-${{ runner.os }}-
-
-    # Install Typocop
-    - name: Install Typocop
+    - name: Check for Gemfile and Add Typocop if Missing
+      id: check_gemfile
       run: |
-        gem install typocop  # Install Typocop gem globally
+        if [ -f Gemfile ]; then
+          if ! grep -q "gem 'typocop'" Gemfile; then
+            echo "gem 'typocop'" >> Gemfile
+          fi
+        else
+          echo "source 'https://rubygems.org'" > Gemfile
+          echo "gem 'typocop'" >> Gemfile
+        fi
       shell: bash
 
-    # Run Typocop
     - name: Run Typocop
       run: |
-        typocop execute --config ${{ inputs.setting }}
+        bundle exec typocop execute --config ${{ inputs.setting }}
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PULL_REQUEST_ID: ${{ inputs.pull_request_id }}
