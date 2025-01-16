@@ -30,11 +30,6 @@ runs:
         ruby-version: '3.1'
         bundler-cache: true
 
-    - name: Install Typocop
-      run: |
-        gem install typocop
-      shell: bash
-
     - name: Run Typocop
       run: |
         typocop execute --config ${{ inputs.setting }}
