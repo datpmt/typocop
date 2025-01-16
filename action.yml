@@ -24,12 +24,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0.1'
-        bundler-cache: true
-
     - name: Check for Gemfile and Add Typocop if Missing
       id: check_gemfile
       run: |
@@ -42,6 +36,12 @@ runs:
           echo "gem 'typocop'" >> Gemfile
         fi
       shell: bash
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0.1'
+        bundler-cache: true
 
     - name: Run Typocop
       run: |
