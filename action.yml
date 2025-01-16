@@ -50,6 +50,10 @@ runs:
         restore-keys: |
           ${{ runner.os }}-bundler-
 
+    - name: Install Dependencies
+      run: bundle install --jobs 4 --retry 3 --path vendor/bundle
+      shell: bash
+
     - name: Run Typocop
       run: |
         bundle exec typocop execute --config ${{ inputs.setting }}
