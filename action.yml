@@ -37,14 +37,15 @@ runs:
         path: |
           ~/.gem
           vendor/bundle
-        key: gem-cache-${{ runner.os }}-ruby-${{ hashFiles('Gemfile.lock') }}
+        key: gem-cache-${{ runner.os }}-ruby-${{ hashFiles('**/Gemfile.lock') }}-${{ runner.os }}
         restore-keys: |
           gem-cache-${{ runner.os }}-ruby-
 
-    # Install Typocop
-    - name: Install Typocop
+    # Install Bundler dependencies (including Typocop)
+    - name: Install Dependencies
       run: |
-        gem install typocop
+        gem install bundler  # Ensure Bundler is installed
+        bundle install       # Install gems from Gemfile (including typocop)
       shell: bash
 
     # Run Typocop
