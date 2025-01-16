@@ -28,24 +28,20 @@ runs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.1'
-        bundler-cache: true
 
-    # Cache Ruby gems to speed up gem installation
+    # Cache Ruby gems (for global installation)
     - name: Cache Ruby gems
       uses: actions/cache@v3
       with:
-        path: |
-          ~/.gem
-          vendor/bundle
-        key: gem-cache-${{ runner.os }}-ruby-${{ hashFiles('**/Gemfile.lock') }}-${{ runner.os }}
+        path: ~/.gem
+        key: gem-cache-${{ runner.os }}-ruby-${{ hashFiles('**/*.gemspec') }}-${{ runner.os }}
         restore-keys: |
-          gem-cache-${{ runner.os }}-ruby-
+          gem-cache-${{ runner.os }}-ruby-${{ runner.os }}-
 
-    # Install Bundler dependencies (including Typocop)
-    - name: Install Dependencies
+    # Install Typocop
+    - name: Install Typocop
       run: |
-        gem install bundler  # Ensure Bundler is installed
-        bundle install       # Install gems from Gemfile (including typocop)
+        gem install typocop  # Install Typocop gem globally
       shell: bash
 
     # Run Typocop
