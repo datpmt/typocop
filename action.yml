@@ -1,5 +1,5 @@
 name: 'typocop'
-description: 'Github action comments on PRs with typos or approvals'
+description: 'GitHub action comments on PRs with typos or approvals'
 author: "Datpmt <datpmt.2k@gmail.com>"
 repository: "https://github.com/datpmt/typocop"
 branding:
@@ -30,6 +30,24 @@ runs:
         ruby-version: '3.1'
         bundler-cache: true
 
+    # Cache Ruby gems to speed up gem installation
+    - name: Cache Ruby gems
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gem
+          vendor/bundle
+        key: gem-cache-${{ runner.os }}-ruby-${{ hashFiles('Gemfile.lock') }}
+        restore-keys: |
+          gem-cache-${{ runner.os }}-ruby-
+
+    # Install Typocop
+    - name: Install Typocop
+      run: |
+        gem install typocop
+      shell: bash
+
+    # Run Typocop
     - name: Run Typocop
       run: |
         typocop execute --config ${{ inputs.setting }}
