@@ -1,5 +1,16 @@
 # Configuration for Typocop - a GitHub Action for checking typos in pull requests
 
+# 'paths' section allows you to specify which files or directories to scan.
+# Only the specified paths will be checked for typos. You can use glob patterns to include directories.
+
+paths: # Files and directories to scan
+  # Example: Scan only the 'src' folder
+  - src/*
+  # Example: Scan a specific file (e.g., 'README.md')
+  - README.md
+  # Example: Scan all Ruby files in the 'lib' directory
+  - lib/**/*.rb
+
 # 'excludes' section allows you to specify files and folders to exclude
 # from the typo-checking process. You can list specific files or use glob
 # patterns to exclude entire directories.
