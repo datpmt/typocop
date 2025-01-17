@@ -165,7 +165,8 @@ module Typocop
       @client.create_pull_request_review(
         @repo_name,
         PULL_ID,
-        event: 'APPROVE'
+        event: 'APPROVE',
+        body: 'Checked for typos — Everything looks great! :star: :tada: :sparkles:'
       )
     rescue Octokit::UnprocessableEntity => e
       puts e
