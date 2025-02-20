@@ -75,7 +75,7 @@ This GitHub Action automatically checks for typos in the files changed in a pull
     ```bash
     gem install typocop # install
 
-    GITHUB_TOKEN=your_token PULL_REQUEST_ID=your_pull_request_id typocop execute # run action
+    GITHUB_TOKEN=your_token PULL_REQUEST_ID=the_request_id GITHUB_BASE_REF=branch_base_name typocop execute # run action
     ```
 
     ![Typocop demo](typocop.gif "")
