@@ -13,12 +13,10 @@ module Typocop
     private
 
     def load_settings(setting_path)
-      begin
-        YAML.load_file(setting_path)
-      rescue StandardError => e
-        puts "Error loading YAML file: #{e.message}"
-        return {}
-      end
+      YAML.load_file(setting_path)
+    rescue StandardError => e
+      puts "Error loading YAML file: #{e.message}"
+      {}
     end
   end
 end

@@ -99,7 +99,7 @@ module Typocop
     end
 
     def line_content(cop)
-      patch = @repo.patch_additions.find { |patch| patch.path == cop.path }
+      patch = @repo.patch_additions.find { |p| p.path == cop.path }
       patch.added_lines.find { |line| line.new_lineno == cop.line }.content
     end
 
