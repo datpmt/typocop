@@ -28,12 +28,10 @@ module Typocop
     typo_checker = TypoChecker::Checker.new(paths: paths, excludes: excludes, skips: skips, stdoutput: false)
     found_typos = typo_checker.scan_repo('.')
 
-    if found_typos.empty?
-      puts 'No typos found'
-    else
-      cops = Cops.new(found_typos)
-      client = Client.new(repo)
-      client.execute(cops.cops)
-    end
+    puts 'No typos found' if found_typos.empty?
+
+    cops = Cops.new(found_typos)
+    client = Client.new(repo)
+    client.execute(cops.cops)
   end
 end
