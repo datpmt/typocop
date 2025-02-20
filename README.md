@@ -16,6 +16,11 @@ This GitHub Action automatically checks for typos in the files changed in a pull
 
 ## Usage
 
+> [!NOTE]
+> If you want GitHub Actions to approve PRs, you must grant permission to it at: project settings -> Actions -> General -> Allow GitHub Actions to create and approve pull requests.
+
+![Typocop Logo](typocop-approval.png)
+
 1. **Using Typocop GitHub Action:**
 
     1. Copy the `.github/workflows/typocop.yml` file into your project repository.
