@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'octokit', '9.2.0'
   s.add_dependency 'rugged', '~> 1.6.3'
   s.add_dependency 'thor', '~> 1.3.2'
-  s.add_dependency 'typo_checker', '0.1.7'
+  s.add_dependency 'typo_checker'
   s.executables = %w[typocop]
   s.files.each do |file|
     next unless file.start_with?('bin/')
